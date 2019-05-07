@@ -1,5 +1,5 @@
-const token = require('../token/token.js');
-const tokenType = token.tokenTypes;
+const Token = require('../token/token.js');
+const tokenType = Token.tokenTypes;
 
 
 class Lexer {
@@ -27,10 +27,10 @@ class Lexer {
 
   nextToken() {
     let token;
+
+    this.skipWhitespace();
     
     switch(this.ch) {
-//      case:
-//        break;
       case '=':
         token = newToken(tokenType.ASSIGN, this.ch);
         break;
@@ -66,16 +66,73 @@ class Lexer {
       case 0:
         token = {type: tokenType.EOF, literal: ""};
         break;
+
+      default:
+        if (isLetter(this.ch)) {
+          let literal = this.readIdentifier();
+          let type = Token.lookupIdent(literal);
+
+          return {type: type, literal: literal};
+        }
+
+        else if (isDigit(this.ch)) {
+          let type = tokenType.INT;
+          let literal = this.readNumber();
+
+          return {type: type, literal: literal};
+        }
+
+        else {
+          token = newToken(tokenType.ILLEGAL, this.ch);
+        }
+        break;
     }
 
     this.readChar();
     return token;
   }
+
+
+  skipWhitespace() {
+    while (
+      this.ch === " " ||
+      this.ch === "\t" ||
+      this.ch === "\n" ||
+      this.ch === "\r"
+    ) {
+      this.readChar();
+    }
+  }
+
+  readIdentifier() {
+    let position = this.position;
+
+    while (isLetter(this.ch)) { this.readChar(); }
+
+    return this.input.slice(position, this.position);
+  }
+
+  readNumber() {
+    let position = this.position;
+
+    while (isDigit(this.ch)) {  this.readChar(); }
+
+    return this.input.slice(position, this.position);
+  }
+
 }
 
 
 function newToken(tokenType, char) {
   return {type: tokenType, literal: char};
+}
+
+function isLetter(char) {
+  return /^[a-zA-Z_]$/.test(char);
+}
+
+function isDigit(char) {
+  return /^[0-9]$/.test(char);
 }
 
 
