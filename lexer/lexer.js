@@ -32,7 +32,51 @@ class Lexer {
     
     switch(this.ch) {
       case '=':
-        token = newToken(tokenType.ASSIGN, this.ch);
+        if (this.peekChar() === "=") {
+          this.readChar();
+          token = newToken(tokenType.EQUALS, "==");
+        }
+        else{
+          token = newToken(tokenType.ASSIGN, this.ch);
+        }
+        break;
+
+      case '+':
+        token = newToken(tokenType.PLUS, this.ch);
+        break;
+
+      case '-':
+        token = newToken(tokenType.MINUS, this.ch);
+        break;
+
+      case '!':
+        if (this.peekChar() === "=") {
+          this.readChar();
+          token = newToken(tokenType.DISTINCT, "!=");
+        }
+        else {
+          token = newToken(tokenType.BANG, this.ch);
+        }
+        break;
+
+      case '*':
+        token = newToken(tokenType.ASTERISK, this.ch);
+        break;
+
+      case '/':
+        token = newToken(tokenType.SLASH, this.ch);
+        break;
+
+      case '<':
+        token = newToken(tokenType.LT, this.ch);
+        break;
+
+      case '>':
+        token = newToken(tokenType.GT, this.ch);
+        break;
+
+      case ',':
+        token = newToken(tokenType.COMMA, this.ch);
         break;
 
       case ';':
@@ -45,14 +89,6 @@ class Lexer {
 
       case ')':
         token = newToken(tokenType.RPAREN, this.ch);
-        break;
-
-      case ',':
-        token = newToken(tokenType.COMMA, this.ch);
-        break;
-
-      case '+':
-        token = newToken(tokenType.PLUS, this.ch);
         break;
 
       case '{':
@@ -118,6 +154,15 @@ class Lexer {
     while (isDigit(this.ch)) {  this.readChar(); }
 
     return this.input.slice(position, this.position);
+  }
+
+  peekChar() {
+    if (this.readPosition >= this.input.length) {
+      return 0;
+    }
+    else {
+      return this.input[this.readPosition];
+    }
   }
 
 }

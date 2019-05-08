@@ -7,6 +7,12 @@ const tokenTypes = {
 
   ASSIGN: "=",
   PLUS: "+",
+  MINUS: "-",
+  BANG: "!",
+  ASTERISK: "*",
+  SLASH: "/",
+  LT: "<",
+  GT: ">",
 
   COMMA: ",",
   SEMICOLON: ";",
@@ -16,13 +22,26 @@ const tokenTypes = {
   LBRACE: "{",
   RBRACE: "}",
 
+  EQUALS: "==",
+  DISTINCT: "!=",
+
   FUNCTION: "FUNCTION",
-  LET: "LET"
+  LET: "LET",
+  TRUE: "TRUE",
+  FALSE: "FALSE",
+  IF: "IF",
+  ELSE: "ELSE",
+  RETURN: "RETURN",
 };
 
 const keywords = {
   "fn": tokenTypes.FUNCTION,
-  "let": tokenTypes.LET
+  "let": tokenTypes.LET,
+  "true": tokenTypes.TRUE,
+  "false": tokenTypes.FALSE,
+  "if": tokenTypes.IF,
+  "else": tokenTypes.ELSE,
+  "return": tokenTypes.RETURN
 };
 
 

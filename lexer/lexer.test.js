@@ -1,6 +1,6 @@
 const Lexer = require("./lexer.js");
-const token = require("../token/token.js");
-const tokenType = token.tokenTypes;
+const Token = require("../token/token.js");
+const tokenType = Token.tokenTypes;
 
 test("nextToken function", () => {
   let input = `
@@ -60,6 +60,79 @@ test("nextToken function", () => {
   let lexer = new Lexer(input);
 
   tests.forEach((expectedToken) => {
+    let token = lexer.nextToken();
+
+    expect(token.type).toBe(expectedToken.type);
+    expect(token.literal).toBe(expectedToken.literal);
+  });
+});
+
+test("nextToken function - Additional tokens", () => {
+  let input = `
+  !-/*5;
+  5 < 10 > 5;
+
+  if (5 < 10) {
+    return true;
+  } else {
+    return false;
+  }
+
+  10 == 10;
+  10 != 9;
+  `;
+
+  let tests = [
+    {type: tokenType.BANG, literal: "!"},
+    {type: tokenType.MINUS, literal: "-"},
+    {type: tokenType.SLASH, literal: "/"},
+    {type: tokenType.ASTERISK, literal: "*"},
+    {type: tokenType.INT, literal: "5"},
+    {type: tokenType.SEMICOLON, literal: ";"},
+
+    {type: tokenType.INT, literal: "5"},
+    {type: tokenType.LT, literal: "<"},
+    {type: tokenType.INT, literal: "10"},
+    {type: tokenType.GT, literal: ">"},
+    {type: tokenType.INT, literal: "5"},
+    {type: tokenType.SEMICOLON, literal: ";"},
+
+    {type: tokenType.IF, literal: "if"},
+    {type: tokenType.LPAREN, literal: "("},
+    {type: tokenType.INT, literal: "5"},
+    {type: tokenType.LT, literal: "<"},
+    {type: tokenType.INT, literal: "10"},
+    {type: tokenType.RPAREN, literal: ")"},
+    {type: tokenType.LBRACE, literal: "{"},
+
+    {type: tokenType.RETURN, literal: "return"},
+    {type: tokenType.TRUE, literal: "true"},
+    {type: tokenType.SEMICOLON, literal: ";"},
+
+    {type: tokenType.RBRACE, literal: "}"},
+    {type: tokenType.ELSE, literal: "else"},
+    {type: tokenType.LBRACE, literal: "{"},
+
+    {type: tokenType.RETURN, literal: "return"},
+    {type: tokenType.FALSE, literal: "false"},
+    {type: tokenType.SEMICOLON, literal: ";"},
+
+    {type: tokenType.RBRACE, literal: "}"},
+
+    {type: tokenType.INT, literal: "10"},
+    {type: tokenType.EQUALS, literal: "=="},
+    {type: tokenType.INT, literal: "10"},
+    {type: tokenType.SEMICOLON, literal: ";"},
+    {type: tokenType.INT, literal: "10"},
+    {type: tokenType.DISTINCT, literal: "!="},
+    {type: tokenType.INT, literal: "9"},
+    {type: tokenType.SEMICOLON, literal: ";"},
+    {type: tokenType.EOF, literal: ""},
+  ];
+
+  let lexer = new Lexer(input);
+
+  tests.forEach(expectedToken => {
     let token = lexer.nextToken();
 
     expect(token.type).toBe(expectedToken.type);
