@@ -12,6 +12,10 @@ class Program {
       return "";
     }
   }
+
+  toString() {
+    return this.statements.map(st => st.toString()).join("\n");
+  }
 }
 
 class LetStatement {
@@ -21,10 +25,42 @@ class LetStatement {
     this.value = value;
   }
 
-  statementNode() {}
+  tokenLiteral() {
+    return this.token.literal;
+  }
+
+  toString() {
+    return `${this.tokenLiteral()} ${this.name} = ${this.value};`;
+  }
+}
+
+class ReturnStatement {
+  constructor(token, returnValue) {
+    this.token = token;
+    this.returnValue = returnValue;
+  }
 
   tokenLiteral() {
     return this.token.literal;
+  }
+
+  toString() {
+    return `${this.tokenLiteral()} ${this.returnValue};`;
+  }
+}
+
+class ExpressionStatement {
+  constructor() {
+    this.token = null;
+    this.expression = null;
+  }
+
+  tokenLiteral() {
+    return this.token.literal;
+  }
+
+  toString() {
+    return `${this.expression};`;
   }
 }
 
@@ -34,10 +70,12 @@ class Identifier {
     this.value = value;
   }
 
-  expressionNode() {}
-
   tokenLiteral() {
     return this.token.literal;
+  }
+
+  toString() {
+    return this.value;
   }
 }
 
@@ -45,5 +83,7 @@ class Identifier {
 module.exports = {
   Program,
   LetStatement,
+  ReturnStatement,
+  ExpressionStatement,
   Identifier
 };
