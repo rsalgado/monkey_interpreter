@@ -120,11 +120,11 @@ test("nextToken function - Additional tokens", () => {
     {type: tokenType.RBRACE, literal: "}"},
 
     {type: tokenType.INT, literal: "10"},
-    {type: tokenType.EQUALS, literal: "=="},
+    {type: tokenType.EQ, literal: "=="},
     {type: tokenType.INT, literal: "10"},
     {type: tokenType.SEMICOLON, literal: ";"},
     {type: tokenType.INT, literal: "10"},
-    {type: tokenType.DISTINCT, literal: "!="},
+    {type: tokenType.NOT_EQ, literal: "!="},
     {type: tokenType.INT, literal: "9"},
     {type: tokenType.SEMICOLON, literal: ";"},
     {type: tokenType.EOF, literal: ""},

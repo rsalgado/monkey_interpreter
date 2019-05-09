@@ -15,7 +15,7 @@ class Lexer {
 
   readChar() {
     if (this.readPosition >= this.input.length) {
-      this.ch = 0;
+      this.ch = null;
     }
     else {
       this.ch = this.input[this.readPosition];
@@ -34,7 +34,7 @@ class Lexer {
       case '=':
         if (this.peekChar() === "=") {
           this.readChar();
-          token = newToken(tokenType.EQUALS, "==");
+          token = newToken(tokenType.EQ, "==");
         }
         else{
           token = newToken(tokenType.ASSIGN, this.ch);
@@ -52,7 +52,7 @@ class Lexer {
       case '!':
         if (this.peekChar() === "=") {
           this.readChar();
-          token = newToken(tokenType.DISTINCT, "!=");
+          token = newToken(tokenType.NOT_EQ, "!=");
         }
         else {
           token = newToken(tokenType.BANG, this.ch);
@@ -99,7 +99,7 @@ class Lexer {
         token = newToken(tokenType.RBRACE, this.ch);
         break;
 
-      case 0:
+      case null:
         token = {type: tokenType.EOF, literal: ""};
         break;
 

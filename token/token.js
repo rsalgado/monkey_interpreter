@@ -22,8 +22,8 @@ const tokenTypes = {
   LBRACE: "{",
   RBRACE: "}",
 
-  EQUALS: "==",
-  DISTINCT: "!=",
+  EQ: "==",
+  NOT_EQ: "!=",
 
   FUNCTION: "FUNCTION",
   LET: "LET",
