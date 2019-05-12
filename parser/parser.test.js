@@ -98,10 +98,29 @@ test("identifier expression", () => {
   expect(program.statements.length).toBe(1);
   let statement = program.statements[0];
   
-  expect(statement).toHaveProperty('expression');
+  expect(statement).toHaveProperty("expression");
   let identifier = statement.expression;
   
-  expect(identifier).toHaveProperty('value');
+  expect(identifier).toHaveProperty("value");
   expect(identifier.value).toBe("foobar");
   expect(identifier.tokenLiteral()).toBe("foobar");
+});
+
+test("integer literal expression", () => {
+  let input = "5;";
+  
+  let lexer = new Lexer(input);
+  let parser = new Parser(lexer);
+  let program = parser.parseProgram();
+
+  expect(parser.errors).toEqual([]);
+  expect(program.statements.length).toBe(1);
+  let statement = program.statements[0];
+
+  expect(statement).toHaveProperty("expression");
+  let literal = statement.expression;
+
+  expect(literal).toHaveProperty("value");
+  expect(literal.value).toBe(5);
+  expect(literal.tokenLiteral()).toBe("5");
 });

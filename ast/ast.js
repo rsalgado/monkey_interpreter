@@ -81,11 +81,27 @@ class Identifier {
   }
 }
 
+class IntegerLiteral {
+  constructor(token, value) {
+    this.token = token;
+    this.value = value;
+  }
+
+  tokenLiteral() {
+    return this.token.literal;
+  }
+
+  toString() {
+    return this.token.literal;
+  }
+}
+
 
 module.exports = {
   Program,
   LetStatement,
   ReturnStatement,
   ExpressionStatement,
-  Identifier
+  Identifier,
+  IntegerLiteral
 };

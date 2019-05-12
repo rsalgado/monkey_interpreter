@@ -22,6 +22,7 @@ class Parser {
     this.infixParseFunctions = {};
 
     this.registerPrefix(tokenType.IDENT, this.parseIdentifier);
+    this.registerPrefix(tokenType.INT, this.parseIntegerLiteral);
 
     this.nextToken();
     this.nextToken();
@@ -108,6 +109,17 @@ class Parser {
 
   parseIdentifier() {
     return new ast.Identifier(this.currentToken, this.currentToken.literal);
+  }
+
+  parseIntegerLiteral() {
+    let value = parseInt(this.currentToken.literal);
+    if (isNaN(value)) {
+      let message = `could not parse ${this.currentToken.literal} as integer`;
+      this.errors.push(message);
+      return null;
+    }
+
+    return new ast.IntegerLiteral(this.currentToken, value);
   }
 
 
