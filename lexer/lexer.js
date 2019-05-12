@@ -14,16 +14,21 @@ class Lexer {
   }
 
   readChar() {
-    if (this.readPosition >= this.input.length) {
+    if (this.readPosition >= this.input.length)
       this.ch = null;
-    }
-    else {
+    else
       this.ch = this.input[this.readPosition];
-    }
 
     this.position = this.readPosition;
     this.readPosition += 1;
   }
+
+  peekChar() {
+    if (this.readPosition >= this.input.length)
+      return null;
+    else
+      return this.input[this.readPosition];
+  }  
 
   nextToken() {
     let token;
@@ -100,22 +105,20 @@ class Lexer {
         break;
 
       case null:
-        token = {type: tokenType.EOF, literal: ""};
+        token = newToken(tokenType.EOF, "");
         break;
 
       default:
         if (isLetter(this.ch)) {
           let literal = this.readIdentifier();
           let type = Token.lookupIdent(literal);
-
-          return {type: type, literal: literal};
+          return newToken(type, literal);
         }
 
         else if (isDigit(this.ch)) {
           let type = tokenType.INT;
           let literal = this.readNumber();
-
-          return {type: type, literal: literal};
+          return newToken(type, literal);
         }
 
         else {
@@ -142,43 +145,26 @@ class Lexer {
 
   readIdentifier() {
     let position = this.position;
-
-    while (isLetter(this.ch)) { this.readChar(); }
+    while (isLetter(this.ch))   this.readChar();
 
     return this.input.slice(position, this.position);
   }
 
   readNumber() {
     let position = this.position;
-
-    while (isDigit(this.ch)) {  this.readChar(); }
+    while (isDigit(this.ch))  this.readChar();
 
     return this.input.slice(position, this.position);
   }
-
-  peekChar() {
-    if (this.readPosition >= this.input.length) {
-      return 0;
-    }
-    else {
-      return this.input[this.readPosition];
-    }
-  }
-
 }
 
 
-function newToken(tokenType, char) {
-  return {type: tokenType, literal: char};
+function newToken(tokenType, literal) {
+  return {type: tokenType, literal: literal};
 }
 
-function isLetter(char) {
-  return /^[a-zA-Z_]$/.test(char);
-}
-
-function isDigit(char) {
-  return /^[0-9]$/.test(char);
-}
+function isLetter(char) { return /^[a-zA-Z_]$/.test(char); }
+function isDigit(char) {  return /^[0-9]$/.test(char); }
 
 
 module.exports = Lexer;

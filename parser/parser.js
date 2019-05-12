@@ -36,10 +36,13 @@ class Parser {
 
   parseStatement() {
     switch(this.currentToken.type) {
+
       case tokenType.LET:
         return this.parseLetStatement();
+
       case tokenType.RETURN:
         return this.parseReturnStatement();
+
       default:
         return null;
     }
@@ -54,8 +57,7 @@ class Parser {
     if (!this.expectPeek(tokenType.ASSIGN)) return null;
 
     // TODO: For now we're skipping the expression until we encounter a semicolon
-    while (!this.isCurrentType(tokenType.SEMICOLON))
-      this.nextToken();
+    while (!this.isCurrentType(tokenType.SEMICOLON)) {  this.nextToken(); }
 
     let statement = new ast.LetStatement(letToken, name, null);
     return statement;
@@ -63,29 +65,21 @@ class Parser {
 
   parseReturnStatement() {
     let returnToken = this.currentToken;
-
     this.nextToken();
 
     // TODO: For now we're skipping the expression until we encounter a semicolon
-    while (!this.isCurrentType(tokenType.SEMICOLON))
-      this.nextToken();
+    while (!this.isCurrentType(tokenType.SEMICOLON))  { this.nextToken(); }
 
     let statement = new ast.ReturnStatement(returnToken, null);
     return statement;
   }
 
 
-  parseError(message) {
-    console.error(message);
-  }
+  parseError(message) { console.error(message);  }
 
-  isCurrentType(type) {
-    return this.currentToken.type === type;
-  }
+  isCurrentType(type) { return this.currentToken.type === type; }
 
-  isPeekToken(type) {
-    return this.peekToken.type === type;
-  }
+  isPeekToken(type) { return this.peekToken.type === type; }
 
   expectPeek(type) {
     if (this.isPeekToken(type)) {
@@ -104,7 +98,6 @@ class Parser {
   }
 
 }
-
 
 
 module.exports = {

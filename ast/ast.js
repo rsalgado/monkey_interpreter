@@ -1,22 +1,24 @@
 
 class Program {
+
   constructor() {
     this.statements = [];
   }
 
   tokenLiteral() {
-    if (this.statements.length > 0) {
+    if (this.statements.length > 0)
       return this.statements[0].tokenLiteral();
-    }
-    else {
+    else
       return "";
-    }
   }
 
   toString() {
-    return this.statements.map(st => st.toString()).join("\n");
+    return this.statements
+              .map(st => st.toString())
+              .join("\n");
   }
 }
+
 
 class LetStatement {
   constructor(token, name, value) {
