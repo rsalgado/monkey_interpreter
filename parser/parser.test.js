@@ -1,10 +1,9 @@
 const Token = require('../token/token');
 const Lexer = require('../lexer/lexer');
-const parser = require('./parser');
+const Parser = require('./parser');
 const ast = require('../ast/ast');
 
 const tokenType = Token.tokenTypes;
-const Parser = parser.Parser;
 
 
 test("`let` statement", () => {
@@ -15,11 +14,11 @@ test("`let` statement", () => {
   `;
 
   let lexer = new Lexer(input);
-  let p = new Parser(lexer);
+  let parser = new Parser(lexer);
 
-  let program = p.parseProgram();
+  let program = parser.parseProgram();
 
-  expect(p.errors).toEqual([]);
+  expect(parser.errors).toEqual([]);
   expect(program).not.toBe(null);
   expect(program.statements.length).toBe(3);
 
@@ -48,11 +47,11 @@ test("`return` statement", () => {
   `;
 
   let lexer = new Lexer(input);
-  let p = new Parser(lexer);
+  let parser = new Parser(lexer);
 
-  let program = p.parseProgram();
+  let program = parser.parseProgram();
 
-  expect(p.errors).toEqual([]);
+  expect(parser.errors).toEqual([]);
   expect(program.statements.length).toBe(3);
 
   program.statements.forEach(st => {
@@ -87,4 +86,22 @@ test("program string representation with `toString()`",  () => {
   ];
 
   expect(program.toString()).toBe("let myVar = anotherVar;");
+});
+
+test("identifier expression", () => {
+  let input = "foobar;";
+
+  let lexer = new Lexer(input);
+  let parser = new Parser(lexer);
+  let program = parser.parseProgram();
+
+  expect(program.statements.length).toBe(1);
+  let statement = program.statements[0];
+  
+  expect(statement).toHaveProperty('expression');
+  let identifier = statement.expression;
+  
+  expect(identifier).toHaveProperty('value');
+  expect(identifier.value).toBe("foobar");
+  expect(identifier.tokenLiteral()).toBe("foobar");
 });

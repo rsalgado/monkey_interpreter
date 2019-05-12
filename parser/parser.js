@@ -2,6 +2,15 @@ const ast = require('../ast/ast');
 const token = require('../token/token');
 const tokenType = token.tokenTypes;
 
+const precedences = {
+  LOWEST: 0,
+  EQUALS: 1,      // ==
+  LESSGREATER: 2, // < or >
+  SUM: 3,         // +
+  PRODUCT: 4,     // *
+  PREFIX: 5,      // -X or !X
+  CALL: 6         // myFunction(X)
+};
 
 class Parser {
   constructor(lexer) {
@@ -9,6 +18,10 @@ class Parser {
     this.errors = [];
     this.currentToken = null;
     this.peekToken = null;
+    this.prefixParseFunctions = {};
+    this.infixParseFunctions = {};
+
+    this.registerPrefix(tokenType.IDENT, this.parseIdentifier);
 
     this.nextToken();
     this.nextToken();
@@ -44,7 +57,7 @@ class Parser {
         return this.parseReturnStatement();
 
       default:
-        return null;
+        return this.parseExpressionStatement();
     }
   }
 
@@ -74,12 +87,47 @@ class Parser {
     return statement;
   }
 
+  parseExpressionStatement() {
+    let statement = new ast.ExpressionStatement();
+    statement.token = this.currentToken;
+    statement.expression = this.parseExpression(precedences.LOWEST);
+
+    if (this.isPeekToken(tokenType.SEMICOLON))
+      this.nextToken();
+    
+    return statement;
+  }
+
+  parseExpression(precedence) {
+    let prefix = this.prefixParseFunctions[this.currentToken.type];
+    if (!prefix)  return null;
+
+    let leftExpression = prefix();
+    return leftExpression;
+  }
+
+  parseIdentifier() {
+    return new ast.Identifier(this.currentToken, this.currentToken.literal);
+  }
+
 
   parseError(message) { console.error(message);  }
 
   isCurrentType(type) { return this.currentToken.type === type; }
 
   isPeekToken(type) { return this.peekToken.type === type; }
+
+  registerPrefix(type, parseFunction) {
+    // The binding is necessary due to the functions to be registered assuming
+    // `this` points to the current object (like inside `parseIdentifier`)
+    this.prefixParseFunctions[type] = parseFunction.bind(this);
+  }
+
+  registerInfix(type, parseFunction) {
+    // The binding is necessary due to the functions to be registered assuming
+    // `this` points to the current object (like inside `parseIdentifier`)
+    this.infixParseFunctions[type] = parseFunction.bind(this);
+  }
 
   expectPeek(type) {
     if (this.isPeekToken(type)) {
@@ -100,6 +148,4 @@ class Parser {
 }
 
 
-module.exports = {
-  Parser
-};
+module.exports = Parser;
