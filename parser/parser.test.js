@@ -100,10 +100,8 @@ test("identifier expression", () => {
   
   expect(statement).toHaveProperty("expression");
   let identifier = statement.expression;
-  
-  expect(identifier).toHaveProperty("value");
-  expect(identifier.value).toBe("foobar");
-  expect(identifier.tokenLiteral()).toBe("foobar");
+
+  testIdentifier(identifier, "foobar");
 });
 
 test("integer literal expression", () => {
@@ -118,11 +116,9 @@ test("integer literal expression", () => {
   let statement = program.statements[0];
 
   expect(statement).toHaveProperty("expression");
-  let literal = statement.expression;
+  let expression = statement.expression;
 
-  expect(literal).toHaveProperty("value");
-  expect(literal.value).toBe(5);
-  expect(literal.tokenLiteral()).toBe("5");
+  testIntegerLiteral(expression, 5);
 });
 
 test("prefix operator expressions", () => {
@@ -147,9 +143,7 @@ test("prefix operator expressions", () => {
     expect(expression).toHaveProperty("right");
     expect(expression.operator).toBe(testcase.operator);
 
-    let rightExpression = expression.right;
-    expect(rightExpression.value).toBe(testcase.value);
-    expect(rightExpression.tokenLiteral()).toBe(`${testcase.value}`);
+    testIntegerLiteral(expression.right, testcase.value);
   });
 });
 
@@ -178,22 +172,8 @@ test("infix operator expressions", () => {
     expect(statement).toHaveProperty("expression");
 
     let expression = statement.expression;
-    expect(expression).toHaveProperty("operator");
-    expect(expression).toHaveProperty("left");
-    expect(expression).toHaveProperty("right");
 
-    
-    let leftExpression = expression.left;
-    let rightExpression = expression.right;
-    let operator = expression.operator;
-
-    expect(leftExpression.value).toBe(testcase.leftValue);
-    expect(leftExpression.tokenLiteral()).toBe(`${testcase.leftValue}`);
-
-    expect(rightExpression.value).toBe(testcase.rightValue);
-    expect(rightExpression.tokenLiteral()).toBe(`${testcase.rightValue}`);
-
-    expect(operator).toBe(testcase.operator);
+    testInfixExpression(expression, testcase.leftValue, testcase.operator, testcase.rightValue);
   });
 });
 
@@ -222,3 +202,34 @@ test("operator precedence parsing", () => {
     expect(program.toString()).toBe(testcase.expected);
   });
 });
+
+
+
+function testInfixExpression(expression, left, operator, right) {
+  expect(expression instanceof ast.InfixExpression).toBe(true);
+  expect(expression.operator).toBe(operator);
+  testLiteralExpression(expression.left, left);
+  testLiteralExpression(expression.right, right);
+}
+
+function testLiteralExpression(expression, value) {
+  if (expression instanceof ast.IntegerLiteral)
+    testIntegerLiteral(expression, value);
+  else if (expression instanceof ast.Identifier)
+    testIdentifier(expression, value);
+  else
+    return;
+}
+
+function testIntegerLiteral(expression, value) {
+  expect(expression instanceof ast.IntegerLiteral).toBe(true);
+  expect(expression.value).toBe(value);
+  expect(expression.tokenLiteral()).toBe(`${value}`);
+}
+
+function testIdentifier(expression, value) {
+  expect(expression instanceof ast.Identifier).toBe(true);
+  expect(expression.value).toBe(value);
+  expect(expression.tokenLiteral()).toBe(`${value}`);
+}
+
