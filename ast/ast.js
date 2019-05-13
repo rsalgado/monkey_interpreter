@@ -129,6 +129,21 @@ class InfixExpression {
   }
 }
 
+class Boolean {
+  constructor(token, value) {
+    this.token = token;
+    this.value = value;
+  }
+
+  tokenLiteral() {
+    return this.token.literal;
+  }
+
+  toString() {
+    return this.token.literal;
+  }
+}
+
 
 module.exports = {
   Program,
@@ -138,6 +153,7 @@ module.exports = {
   Identifier,
   IntegerLiteral,
   PrefixExpression,
-  InfixExpression
+  InfixExpression,
+  Boolean
 };
 
