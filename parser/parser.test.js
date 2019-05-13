@@ -124,3 +124,31 @@ test("integer literal expression", () => {
   expect(literal.value).toBe(5);
   expect(literal.tokenLiteral()).toBe("5");
 });
+
+test("prefix operator expression", () => {
+  let tests = [
+    {input: "!5;", operator: "!", value: 5},
+    {input: "-15", operator: "-", value: 15}
+  ];
+
+  tests.forEach(testcase => {
+    let lexer = new Lexer(testcase.input);
+    let parser  = new Parser(lexer);
+    let program = parser.parseProgram();
+
+    expect(parser.errors).toEqual([]);
+    expect(program.statements.length).toBe(1);
+
+    let statement = program.statements[0];
+    expect(statement).toHaveProperty("expression");
+
+    let expression = statement.expression;
+    expect(expression).toHaveProperty("operator");
+    expect(expression).toHaveProperty("right");
+    expect(expression.operator).toBe(testcase.operator);
+
+    let rightExpression = expression.right;
+    expect(rightExpression.value).toBe(testcase.value);
+    expect(rightExpression.tokenLiteral()).toBe(`${testcase.value}`);
+  });
+});

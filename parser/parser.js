@@ -23,6 +23,8 @@ class Parser {
 
     this.registerPrefix(tokenType.IDENT, this.parseIdentifier);
     this.registerPrefix(tokenType.INT, this.parseIntegerLiteral);
+    this.registerPrefix(tokenType.BANG, this.parsePrefixExpression);
+    this.registerPrefix(tokenType.MINUS, this.parsePrefixExpression);
 
     this.nextToken();
     this.nextToken();
@@ -101,7 +103,11 @@ class Parser {
 
   parseExpression(precedence) {
     let prefix = this.prefixParseFunctions[this.currentToken.type];
-    if (!prefix)  return null;
+    if (!prefix) {
+      let message = `No prefix parse function for ${this.currentToken.type} found`;
+      this.errors.push(message);
+      return null;
+    }
 
     let leftExpression = prefix();
     return leftExpression;
@@ -120,6 +126,14 @@ class Parser {
     }
 
     return new ast.IntegerLiteral(this.currentToken, value);
+  }
+
+  parsePrefixExpression() {
+    let expression = new ast.PrefixExpression(this.currentToken, this.currentToken.literal);
+    this.nextToken();
+
+    expression.right = this.parseExpression(precedences.PREFIX);
+    return expression;
   }
 
 
