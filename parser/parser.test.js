@@ -125,7 +125,7 @@ test("integer literal expression", () => {
   expect(literal.tokenLiteral()).toBe("5");
 });
 
-test("prefix operator expression", () => {
+test("prefix operator expressions", () => {
   let tests = [
     {input: "!5;", operator: "!", value: 5},
     {input: "-15", operator: "-", value: 15}
@@ -150,5 +150,75 @@ test("prefix operator expression", () => {
     let rightExpression = expression.right;
     expect(rightExpression.value).toBe(testcase.value);
     expect(rightExpression.tokenLiteral()).toBe(`${testcase.value}`);
+  });
+});
+
+test("infix operator expressions", () => {
+  let tests = [
+    {input: "5 + 5;", leftValue: 5, operator: "+", rightValue: 5},
+    {input: "5 - 5;", leftValue: 5, operator: "-", rightValue: 5},
+    {input: "5 * 5;", leftValue: 5, operator: "*", rightValue: 5},
+    {input: "5 / 5;", leftValue: 5, operator: "/", rightValue: 5},
+
+    {input: "5 > 5;", leftValue: 5, operator: ">", rightValue: 5},
+    {input: "5 < 5;", leftValue: 5, operator: "<", rightValue: 5},
+    {input: "5 == 5;", leftValue: 5, operator: "==", rightValue: 5},
+    {input: "5 != 5;", leftValue: 5, operator: "!=", rightValue: 5},
+  ];
+
+  tests.forEach(testcase => {
+    let lexer = new Lexer(testcase.input);
+    let parser = new Parser(lexer);
+    let program = parser.parseProgram();
+
+    expect(parser.errors).toEqual([]);
+    expect(program.statements.length).toBe(1);
+
+    let statement = program.statements[0];
+    expect(statement).toHaveProperty("expression");
+
+    let expression = statement.expression;
+    expect(expression).toHaveProperty("operator");
+    expect(expression).toHaveProperty("left");
+    expect(expression).toHaveProperty("right");
+
+    
+    let leftExpression = expression.left;
+    let rightExpression = expression.right;
+    let operator = expression.operator;
+
+    expect(leftExpression.value).toBe(testcase.leftValue);
+    expect(leftExpression.tokenLiteral()).toBe(`${testcase.leftValue}`);
+
+    expect(rightExpression.value).toBe(testcase.rightValue);
+    expect(rightExpression.tokenLiteral()).toBe(`${testcase.rightValue}`);
+
+    expect(operator).toBe(testcase.operator);
+  });
+});
+
+test("operator precedence parsing", () => {
+  let tests = [
+    {input: "-a * b;", expected: "((-a) * b);"},
+    {input: "!-a;", expected: "(!(-a));"},
+    {input: "a + b + c;", expected: "((a + b) + c);"},
+    {input: "a + b - c;", expected: "((a + b) - c);"},
+    {input: " a * b * c;", expected: "((a * b) * c);"},
+    {input: "a * b / c;", expected: "((a * b) / c);"},
+    {input: "a + b / c;", expected: "(a + (b / c));"},
+    {input: "a + b * c + d / e - f;", expected: "(((a + (b * c)) + (d / e)) - f);"},
+    {input: "3 + 4; -5 * 5;", expected: "(3 + 4);\n((-5) * 5);"},
+    {input: "5 > 4 == 3 < 4;", expected: "((5 > 4) == (3 < 4));"},
+    {input: "5 < 4 != 3 > 4;", expected: "((5 < 4) != (3 > 4));"},
+    {input: "3 + 4 * 5 == 3 * 1 + 4 * 5;", expected: "((3 + (4 * 5)) == ((3 * 1) + (4 * 5)));"}
+  ];
+
+  tests.forEach(testcase => {
+    let lexer = new Lexer(testcase.input);
+    let parser = new Parser(lexer);
+    let program = parser.parseProgram();
+
+    expect(parser.errors).toEqual([]);
+    expect(program.toString()).toBe(testcase.expected);
   });
 });

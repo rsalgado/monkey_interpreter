@@ -112,6 +112,23 @@ class PrefixExpression {
   }
 }
 
+class InfixExpression {
+  constructor(token, operator, left) {
+    this.token = token;
+    this.operator = operator;
+    this.left = left;
+    this.right = null;
+  }
+
+  tokenLiteral() {
+    return this.token.literal;
+  }
+
+  toString() {
+    return `(${this.left} ${this.operator} ${this.right})`;
+  }
+}
+
 
 module.exports = {
   Program,
@@ -120,5 +137,7 @@ module.exports = {
   ExpressionStatement,
   Identifier,
   IntegerLiteral,
-  PrefixExpression
+  PrefixExpression,
+  InfixExpression
 };
+

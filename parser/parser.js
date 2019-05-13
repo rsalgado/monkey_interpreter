@@ -12,6 +12,18 @@ const precedences = {
   CALL: 6         // myFunction(X)
 };
 
+const tokenPrecedence = {
+  [tokenType.EQ]: precedences.EQUALS,
+  [tokenType.NOT_EQ]: precedences.EQUALS,
+  [tokenType.LT]: precedences.LESSGREATER,
+  [tokenType.GT]: precedences.LESSGREATER,
+  [tokenType.PLUS]: precedences.SUM,
+  [tokenType.MINUS]: precedences.SUM,
+  [tokenType.SLASH]: precedences.PRODUCT,
+  [tokenType.ASTERISK]: precedences.PRODUCT
+};
+
+
 class Parser {
   constructor(lexer) {
     this.lexer = lexer;
@@ -26,6 +38,15 @@ class Parser {
     this.registerPrefix(tokenType.BANG, this.parsePrefixExpression);
     this.registerPrefix(tokenType.MINUS, this.parsePrefixExpression);
 
+    this.registerInfix(tokenType.PLUS, this.parseInfixExpression);
+    this.registerInfix(tokenType.MINUS, this.parseInfixExpression);
+    this.registerInfix(tokenType.SLASH, this.parseInfixExpression);
+    this.registerInfix(tokenType.ASTERISK, this.parseInfixExpression);
+    this.registerInfix(tokenType.EQ, this.parseInfixExpression);
+    this.registerInfix(tokenType.NOT_EQ, this.parseInfixExpression);
+    this.registerInfix(tokenType.LT, this.parseInfixExpression);
+    this.registerInfix(tokenType.GT, this.parseInfixExpression);
+
     this.nextToken();
     this.nextToken();
   }
@@ -33,6 +54,22 @@ class Parser {
   nextToken() {
     this.currentToken = this.peekToken;
     this.peekToken = this.lexer.nextToken();
+  }
+
+  peekPrecedence() {
+    let precedence = tokenPrecedence[this.peekToken.type];
+    if (precedence !== undefined)
+      return precedence;
+
+    return precedences.LOWEST;
+  }
+
+  currentPrecedence() {
+    let precedence = tokenPrecedence[this.currentToken.type];
+    if (precedence !== undefined)
+      return precedence;
+
+    return precedences.LOWEST;
   }
 
   parseProgram() {
@@ -110,6 +147,16 @@ class Parser {
     }
 
     let leftExpression = prefix();
+
+    while (!this.isPeekToken(tokenType.SEMICOLON) && precedence < this.peekPrecedence()) {
+      let infix = this.infixParseFunctions[this.peekToken.type];
+      if (!infix)
+        return leftExpression;
+
+      this.nextToken();
+      leftExpression = infix(leftExpression);
+    }
+
     return leftExpression;
   }
 
@@ -133,6 +180,16 @@ class Parser {
     this.nextToken();
 
     expression.right = this.parseExpression(precedences.PREFIX);
+    return expression;
+  }
+
+  parseInfixExpression(left) {
+    let expression = new ast.InfixExpression(this.currentToken, this.currentToken.literal, left);
+    
+    let precedence = this.currentPrecedence();
+    this.nextToken();
+    expression.right = this.parseExpression(precedence);
+
     return expression;
   }
 
