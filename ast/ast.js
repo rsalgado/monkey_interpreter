@@ -160,7 +160,7 @@ class IfExpression {
   toString() {
     let string = `if ${this.condition} ${this.consequence}`;
     if (this.alternative)
-      string += `else ${this.alternative}`;
+      string += ` else ${this.alternative}`;
 
     return string;
   }
@@ -177,7 +177,25 @@ class BlockStatement {
   }
 
   toString() {
-    return this.statements.map(st => st.toString()).join("\n");
+    return "{\n" + this.statements.map(st => "\t" + st.toString()).join("\n") + "\n}";
+  }
+}
+
+class FunctionLiteral {
+  constructor(token) {
+    this.token = token;
+    this.parameters = [];
+    this.body = null;
+  }
+
+  tokenLiteral() {
+    return this.token.literal;
+  }
+
+  toString() {
+    let tokenLiteral = this.tokenLiteral();
+    let parametersString = this.parameters.map(p => p.toString()).join(", ");
+    return `${tokenLiteral}(${parametersString}) ${this.body}`;
   }
 }
 
@@ -193,5 +211,6 @@ module.exports = {
   InfixExpression,
   Boolean,
   IfExpression,
-  BlockStatement
+  BlockStatement,
+  FunctionLiteral
 };

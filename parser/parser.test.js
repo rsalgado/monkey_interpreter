@@ -137,6 +137,7 @@ test("boolean literal expression", () => {
   testBoolean(expression, true);
 });
 
+
 describe("if expressions", () => {
   test("if expression", () => {
     let input = "if (x < y) { x };";
@@ -197,6 +198,56 @@ describe("if expressions", () => {
     let alternativeStatement = alternative.statements[0];
     expect(alternativeStatement instanceof ast.ExpressionStatement);
     testIdentifier(alternativeStatement.expression, "y");
+  });
+});
+
+test("function literal expression", () => {
+  let input = "fn(x, y) { x + y; }";
+  let lexer = new Lexer(input);
+  let parser = new Parser(lexer);
+  let program = parser.parseProgram();
+
+  expect(parser.errors).toEqual([]);
+  expect(program.statements.length).toBe(1);
+
+  let statement = program.statements[0];
+  expect(statement instanceof ast.ExpressionStatement).toBe(true);
+
+  let func = statement.expression;
+  expect(func instanceof ast.FunctionLiteral).toBe(true);
+  expect(func.parameters.length).toBe(2);
+  
+  testLiteralExpression(func.parameters[0], "x");
+  testLiteralExpression(func.parameters[1], "y");
+
+  expect(func.body.statements.length).toBe(1);
+
+  let bodyStatement = func.body.statements[0];
+  expect(bodyStatement instanceof ast.ExpressionStatement).toBe(true);
+
+  testInfixExpression(bodyStatement.expression, "x", "+", "y");
+});
+
+describe("function parameter parsing", () => {
+  let testcases = [
+    {input: "fn() {};", expectedParams: []},
+    {input: "fn(x) {};", expectedParams: ["x"]},
+    {input: "fn(x, y, z) {};", expectedParams: ["x", "y", "z"]},
+  ];
+
+  test.each(testcases)("%p", (testcase) => {
+    let lexer = new Lexer(testcase.input);
+    let parser = new Parser(lexer);
+    let program = parser.parseProgram();
+
+    expect(parser.errors).toEqual([]);
+    let statement = program.statements[0];
+    let func = statement.expression;
+
+    expect(func.parameters.length).toBe(testcase.expectedParams.length);
+    testcase.expectedParams.forEach((ep, i) => {
+      testLiteralExpression(func.parameters[i], ep)
+    });
   });
 });
 

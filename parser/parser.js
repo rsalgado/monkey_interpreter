@@ -41,6 +41,7 @@ class Parser {
     this.registerPrefix(tokenType.MINUS, this.parsePrefixExpression);
     this.registerPrefix(tokenType.LPAREN, this.parseGroupedExpression);
     this.registerPrefix(tokenType.IF, this.parseIfExpression);
+    this.registerPrefix(tokenType.FUNCTION, this.parseFunctionLiteral);
 
     this.registerInfix(tokenType.PLUS, this.parseInfixExpression);
     this.registerInfix(tokenType.MINUS, this.parseInfixExpression);
@@ -248,6 +249,43 @@ class Parser {
     }
 
     return block;
+  }
+
+  parseFunctionLiteral() {
+    let literal = new ast.FunctionLiteral(this.currentToken);
+
+    if (!this.expectPeek(tokenType.LPAREN))   return null;
+    literal.parameters = this.parseFunctionParameters();
+    
+    if (!this.expectPeek(tokenType.LBRACE))   return null;
+    literal.body = this.parseBlockStatement();
+
+    return literal;
+  }
+
+  parseFunctionParameters() {
+    let identifiers = [];
+
+    if (this.isPeekToken(tokenType.RPAREN)) {
+      this.nextToken();
+      return identifiers;
+    }
+
+    this.nextToken();
+
+    let ident = new ast.Identifier(this.currentToken, this.currentToken.literal);
+    identifiers.push(ident);
+
+    while (this.isPeekToken(tokenType.COMMA)) {
+      this.nextToken();
+      this.nextToken();
+      let ident = new ast.Identifier(this.currentToken, this.currentToken.literal);
+      identifiers.push(ident);
+    }
+
+    if (!this.expectPeek(tokenType.RPAREN))   return null;
+
+    return identifiers;
   }
 
 
