@@ -137,6 +137,69 @@ test("boolean literal expression", () => {
   testBoolean(expression, true);
 });
 
+describe("if expressions", () => {
+  test("if expression", () => {
+    let input = "if (x < y) { x };";
+
+    let lexer = new Lexer(input);
+    let parser = new Parser(lexer);
+    let program = parser.parseProgram();
+
+    expect(parser.errors).toEqual([]);
+    expect(program.statements.length).toBe(1);
+
+    let statement = program.statements[0];
+    expect(statement instanceof ast.ExpressionStatement).toBe(true);
+    let expression = statement.expression;
+    expect(expression instanceof ast.IfExpression).toBe(true);
+
+    testInfixExpression(expression.condition, "x", "<", "y");
+
+    let consequence = expression.consequence;
+    expect(consequence.statements.length).toBe(1);
+
+    let consequenceStatement = consequence.statements[0];
+    expect(consequenceStatement instanceof ast.ExpressionStatement);
+    testIdentifier(consequenceStatement.expression, "x");
+
+    let alternative = expression.alternative;
+    expect(alternative).toBe(null);
+  });
+
+  test("if-else expression", () => {
+    let input = "if (x < y) { x } else { y };";
+
+    let lexer = new Lexer(input);
+    let parser = new Parser(lexer);
+    let program = parser.parseProgram();
+
+    expect(parser.errors).toEqual([]);
+    expect(program.statements.length).toBe(1);
+
+    let statement = program.statements[0];
+    expect(statement instanceof ast.ExpressionStatement).toBe(true);
+    let expression = statement.expression;
+    expect(expression instanceof ast.IfExpression).toBe(true);
+
+    testInfixExpression(expression.condition, "x", "<", "y");
+
+    let consequence = expression.consequence;
+    expect(consequence.statements.length).toBe(1);
+
+    let consequenceStatement = consequence.statements[0];
+    expect(consequenceStatement instanceof ast.ExpressionStatement);
+    testIdentifier(consequenceStatement.expression, "x");
+
+
+    let alternative = expression.alternative;
+    expect(alternative.statements.length).toBe(1);
+
+    let alternativeStatement = alternative.statements[0];
+    expect(alternativeStatement instanceof ast.ExpressionStatement);
+    testIdentifier(alternativeStatement.expression, "y");
+  });
+});
+
 
 describe("prefix operator expressions", () => {
   let testcases = [
@@ -236,7 +299,6 @@ describe("operator precedence parsing", () => {
     expect(program.toString()).toBe(testcase.expected);
   });
 });
-
 
 
 function testInfixExpression(expression, left, operator, right) {

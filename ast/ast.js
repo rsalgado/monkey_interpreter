@@ -21,7 +21,7 @@ class Program {
 
 
 class LetStatement {
-  constructor(token, name, value) {
+  constructor(token, name = null, value = null) {
     this.token = token;
     this.name = name;
     this.value = value;
@@ -37,7 +37,7 @@ class LetStatement {
 }
 
 class ReturnStatement {
-  constructor(token, returnValue) {
+  constructor(token, returnValue = null) {
     this.token = token;
     this.returnValue = returnValue;
   }
@@ -67,7 +67,7 @@ class ExpressionStatement {
 }
 
 class Identifier {
-  constructor(token, value) {
+  constructor(token, value = null) {
     this.token = token;
     this.value = value;
   }
@@ -82,7 +82,7 @@ class Identifier {
 }
 
 class IntegerLiteral {
-  constructor(token, value) {
+  constructor(token, value = null) {
     this.token = token;
     this.value = value;
   }
@@ -97,7 +97,7 @@ class IntegerLiteral {
 }
 
 class PrefixExpression {
-  constructor(token, operator) {
+  constructor(token, operator = null) {
     this.token = token;
     this.operator = operator;
     this.right = null;
@@ -113,7 +113,7 @@ class PrefixExpression {
 }
 
 class InfixExpression {
-  constructor(token, operator, left) {
+  constructor(token, operator = null, left = null) {
     this.token = token;
     this.operator = operator;
     this.left = left;
@@ -130,7 +130,7 @@ class InfixExpression {
 }
 
 class Boolean {
-  constructor(token, value) {
+  constructor(token, value = null) {
     this.token = token;
     this.value = value;
   }
@@ -145,6 +145,43 @@ class Boolean {
 }
 
 
+class IfExpression {
+  constructor(token, condition = null, consequence = null, alternative = null) {
+    this.token = token;
+    this.condition = condition;
+    this.consequence = consequence;
+    this.alternative = alternative;
+  }
+
+  tokenLiteral() {
+    return this.token.literal;
+  }
+
+  toString() {
+    let string = `if ${this.condition} ${this.consequence}`;
+    if (this.alternative)
+      string += `else ${this.alternative}`;
+
+    return string;
+  }
+}
+
+class BlockStatement {
+  constructor(token) {
+    this.token = token;
+    this.statements = [];
+  }
+
+  tokenLiteral() {
+    return this.token.literal;
+  }
+
+  toString() {
+    return this.statements.map(st => st.toString()).join("\n");
+  }
+}
+
+
 module.exports = {
   Program,
   LetStatement,
@@ -154,6 +191,7 @@ module.exports = {
   IntegerLiteral,
   PrefixExpression,
   InfixExpression,
-  Boolean
+  Boolean,
+  IfExpression,
+  BlockStatement
 };
-

@@ -40,6 +40,7 @@ class Parser {
     this.registerPrefix(tokenType.BANG, this.parsePrefixExpression);
     this.registerPrefix(tokenType.MINUS, this.parsePrefixExpression);
     this.registerPrefix(tokenType.LPAREN, this.parseGroupedExpression);
+    this.registerPrefix(tokenType.IF, this.parseIfExpression);
 
     this.registerInfix(tokenType.PLUS, this.parseInfixExpression);
     this.registerInfix(tokenType.MINUS, this.parseInfixExpression);
@@ -137,7 +138,7 @@ class Parser {
 
     if (this.isPeekToken(tokenType.SEMICOLON))
       this.nextToken();
-    
+
     return statement;
   }
 
@@ -192,7 +193,7 @@ class Parser {
 
   parseInfixExpression(left) {
     let expression = new ast.InfixExpression(this.currentToken, this.currentToken.literal, left);
-    
+
     let precedence = this.currentPrecedence();
     this.nextToken();
     expression.right = this.parseExpression(precedence);
@@ -208,6 +209,45 @@ class Parser {
       return null;
 
     return expression;
+  }
+
+  parseIfExpression() {
+    let expression = new ast.IfExpression(this.currentToken);
+
+    if (!this.expectPeek(tokenType.LPAREN))   return null;
+    this.nextToken();
+
+    expression.condition = this.parseExpression(precedences.LOWEST);
+
+    if (!this.expectPeek(tokenType.RPAREN))   return null;
+    if (!this.expectPeek(tokenType.LBRACE))   return null;
+
+    expression.consequence = this.parseBlockStatement();
+
+    if (this.isPeekToken(tokenType.ELSE)) {
+      this.nextToken();
+      if (!this.expectPeek(tokenType.LBRACE))   return null;
+
+      expression.alternative = this.parseBlockStatement();
+    }
+
+    return expression;
+  }
+
+  parseBlockStatement() {
+    let block = new ast.BlockStatement(this.currentToken);
+
+    this.nextToken();
+
+    while (!this.isCurrentType(tokenType.RBRACE) && !this.isCurrentType(tokenType.EOF)) {
+      let statement = this.parseStatement();
+      if (statement)
+        block.statements.push(statement);
+
+      this.nextToken();
+    }
+
+    return block;
   }
 
 
