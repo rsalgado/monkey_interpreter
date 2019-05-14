@@ -137,15 +137,16 @@ test("boolean literal expression", () => {
   testBoolean(expression, true);
 });
 
-test("prefix operator expressions", () => {
-  let tests = [
+
+describe("prefix operator expressions", () => {
+  let testcases = [
     {input: "!5;", operator: "!", value: 5},
     {input: "-15", operator: "-", value: 15},
     {input: "!true;", operator: "!", value: true},
     {input: "!false;", operator: "!", value: false},
   ];
 
-  tests.forEach(testcase => {
+  test.each(testcases)("%p", (testcase) => {
     let lexer = new Lexer(testcase.input);
     let parser  = new Parser(lexer);
     let program = parser.parseProgram();
@@ -165,8 +166,8 @@ test("prefix operator expressions", () => {
   });
 });
 
-test("infix operator expressions", () => {
-  let tests = [
+describe("infix operator expressions", () => {
+  let testcases = [
     {input: "5 + 5;", leftValue: 5, operator: "+", rightValue: 5},
     {input: "5 - 5;", leftValue: 5, operator: "-", rightValue: 5},
     {input: "5 * 5;", leftValue: 5, operator: "*", rightValue: 5},
@@ -182,7 +183,7 @@ test("infix operator expressions", () => {
     {input: "false == false", leftValue: false, operator: "==", rightValue: false},
   ];
 
-  tests.forEach(testcase => {
+  test.each(testcases)("%p", (testcase) => {
     let lexer = new Lexer(testcase.input);
     let parser = new Parser(lexer);
     let program = parser.parseProgram();
@@ -199,8 +200,8 @@ test("infix operator expressions", () => {
   });
 });
 
-test("operator precedence parsing", () => {
-  let tests = [
+describe("operator precedence parsing", () => {
+  let testcases = [
     {input: "-a * b;", expected: "((-a) * b);"},
     {input: "!-a;", expected: "(!(-a));"},
     {input: "a + b + c;", expected: "((a + b) + c);"},
@@ -226,7 +227,7 @@ test("operator precedence parsing", () => {
     {input: "!(true == true);", expected: "(!(true == true));"}
   ];
 
-  tests.forEach(testcase => {
+  test.each(testcases)("%p", (testcase) => {
     let lexer = new Lexer(testcase.input);
     let parser = new Parser(lexer);
     let program = parser.parseProgram();
