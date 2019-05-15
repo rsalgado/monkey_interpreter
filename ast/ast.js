@@ -199,6 +199,23 @@ class FunctionLiteral {
   }
 }
 
+class CallExpression {
+  constructor(token, func) {
+    this.token = token;
+    this.func = func;
+    this.args = [];
+  }
+
+  tokenLiteral() {
+    return this.token.literal;
+  }
+
+  toString() {
+    let args = this.args.map(a => a.toString()).join(", ");
+    return `${this.func}(${args})`;
+  }
+}
+
 
 module.exports = {
   Program,
@@ -212,5 +229,6 @@ module.exports = {
   Boolean,
   IfExpression,
   BlockStatement,
-  FunctionLiteral
+  FunctionLiteral,
+  CallExpression
 };

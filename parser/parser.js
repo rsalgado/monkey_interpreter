@@ -20,7 +20,8 @@ const tokenPrecedence = {
   [tokenType.PLUS]: precedences.SUM,
   [tokenType.MINUS]: precedences.SUM,
   [tokenType.SLASH]: precedences.PRODUCT,
-  [tokenType.ASTERISK]: precedences.PRODUCT
+  [tokenType.ASTERISK]: precedences.PRODUCT,
+  [tokenType.LPAREN]: precedences.CALL
 };
 
 
@@ -51,6 +52,7 @@ class Parser {
     this.registerInfix(tokenType.NOT_EQ, this.parseInfixExpression);
     this.registerInfix(tokenType.LT, this.parseInfixExpression);
     this.registerInfix(tokenType.GT, this.parseInfixExpression);
+    this.registerInfix(tokenType.LPAREN, this.parseCallExpression);
 
     this.nextToken();
     this.nextToken();
@@ -286,6 +288,35 @@ class Parser {
     if (!this.expectPeek(tokenType.RPAREN))   return null;
 
     return identifiers;
+  }
+
+  parseCallExpression(funcExpression) {
+    let expression = new ast.CallExpression(this.currentToken, funcExpression);
+    expression.args = this.parseCallArguments();
+
+    return expression;
+  }
+
+  parseCallArguments() {
+    let args = [];
+
+    if (this.isPeekToken(tokenType.RPAREN)) {
+      this.nextToken();
+      return args;
+    }
+
+    this.nextToken();
+    args.push(this.parseExpression(precedences.LOWEST));
+
+    while (this.isPeekToken(tokenType.COMMA)) {
+      this.nextToken();
+      this.nextToken();
+      args.push(this.parseExpression(precedences.LOWEST));
+    }
+
+    if (!this.expectPeek(tokenType.RPAREN))   return null;
+
+    return args;
   }
 
 

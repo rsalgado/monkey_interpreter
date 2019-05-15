@@ -228,6 +228,28 @@ test("function literal expression", () => {
   testInfixExpression(bodyStatement.expression, "x", "+", "y");
 });
 
+test("call expression parsing", () => {
+  let input = "add(1, 2 * 3, 4 + 5);";
+  let lexer = new Lexer(input);
+  let parser = new Parser(lexer);
+  let program = parser.parseProgram();
+
+  expect(parser.errors).toEqual([]);
+  expect(program.statements.length).toBe(1);
+  
+  let statement = program.statements[0];
+  expect(statement instanceof ast.ExpressionStatement).toBe(true);
+  
+  let expression = statement.expression;
+  expect(expression instanceof ast.CallExpression).toBe(true);
+
+  testIdentifier(expression.func, "add");
+  expect(expression.args.length).toBe(3);
+  testLiteralExpression(expression.args[0], 1);
+  testInfixExpression(expression.args[1], 2, "*", 3);
+  testInfixExpression(expression.args[2], 4, "+", 5);
+});
+
 describe("function parameter parsing", () => {
   let testcases = [
     {input: "fn() {};", expectedParams: []},
@@ -338,7 +360,11 @@ describe("operator precedence parsing", () => {
     {input: "(5 + 5) * 2;", expected: "((5 + 5) * 2);"},
     {input: "2 / (5 + 5);", expected: "(2 / (5 + 5));"},
     {input: "-(5 + 5);", expected: "(-(5 + 5));"},
-    {input: "!(true == true);", expected: "(!(true == true));"}
+    {input: "!(true == true);", expected: "(!(true == true));"},
+
+    {input: "a + add(b * c) + d;", expected: "((a + add((b * c))) + d);"},
+    {input: "add(a, b, 1, 2 * 3, 4 + 5, add(6, 7 * 8));", expected: "add(a, b, 1, (2 * 3), (4 + 5), add(6, (7 * 8)));"},
+    {input: "add(a + b + c * d / f + g);", expected: "add((((a + b) + ((c * d) / f)) + g));"},
   ];
 
   test.each(testcases)("%p", (testcase) => {
