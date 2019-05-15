@@ -6,57 +6,46 @@ const ast = require('../ast/ast');
 const tokenType = Token.tokenTypes;
 
 
-test("`let` statement", () => {
-  let input = `
-  let x = 5;
-  let y = 10;
-  let foobar = 838383;
-  `;
-
-  let lexer = new Lexer(input);
-  let parser = new Parser(lexer);
-
-  let program = parser.parseProgram();
-
-  expect(parser.errors).toEqual([]);
-  expect(program).not.toBe(null);
-  expect(program.statements.length).toBe(3);
-
-  let tests = [
-    "x",
-    "y",
-    "foobar"
+describe("`let` statement", () => {
+  let testcases = [
+    {input: "let x = 5;", expectedIdentifier: "x", expectedValue: 5},
+    {input: "let y  = true;", expectedIdentifier: "y", expectedValue: true},
+    {input: "let foobar = y;", expectedIdentifier: "foobar", expectedValue: "y"},
   ];
 
-  tests.forEach((identifier, i) => {
-    let statement = program.statements[i];
+  test.each(testcases)("%p", (testcase) => {
+    let lexer = new Lexer(testcase.input);
+    let parser = new Parser(lexer);
+    let program = parser.parseProgram();
 
-    expect(statement.token.literal).toBe("let");
-    expect(statement.token.type).toBe(tokenType.LET);
+    expect(parser.errors).toEqual([]);
+    expect(program.statements.length).toBe(1);
 
-    expect(statement.name.value).toBe(identifier);
-    expect(statement.name.token.literal).toBe(identifier);
+    let statement = program.statements[0];
+    testLetStatement(statement, testcase.expectedIdentifier);
+    
+    testLiteralExpression(statement.value, testcase.expectedValue);
   });
 });
 
-test("`return` statement", () => {
-  let input = `
-  return 5;
-  return 10;
-  return 993322;
-  `;
+describe("`return` statement", () => {
+  let testcases = [
+    {input: "return 10;", expectedReturnValue: 10},
+    {input: "return true;", expectedReturnValue: true},
+    {input: "return x;", expectedReturnValue: "x"},
+  ];
 
-  let lexer = new Lexer(input);
-  let parser = new Parser(lexer);
+  test.each(testcases, "%p", (testcase) => {
+    let lexer = new Lexer(testcase.input);
+    let parser = new Parser(lexer);
+    let program = parser.parseProgram();
 
-  let program = parser.parseProgram();
+    expect(parser.errors).toEqual([]);
+    expect(program.statements.length).toBe(1);
 
-  expect(parser.errors).toEqual([]);
-  expect(program.statements.length).toBe(3);
-
-  program.statements.forEach(st => {
-    expect(st.token.literal).toBe("return");
-    expect(st.token.type).toBe(tokenType.RETURN);
+    let statement = program.statements[0];
+    expect(statement instanceof ast.ReturnStatement).toBe(true);
+    testLiteralExpression(statement.returnValue, testcase.expectedReturnValue);
   });
 });
 
@@ -383,6 +372,15 @@ function testInfixExpression(expression, left, operator, right) {
   expect(expression.operator).toBe(operator);
   testLiteralExpression(expression.left, left);
   testLiteralExpression(expression.right, right);
+}
+
+function testLetStatement(expression, identifier) {
+  expect(expression instanceof ast.LetStatement).toBe(true);
+  expect(expression.tokenLiteral()).toBe("let");
+
+  let ident = expression.name;
+  expect(ident instanceof ast.Identifier).toBe(true);
+  expect(ident.value).toBe(identifier);
 }
 
 function testLiteralExpression(expression, value) {

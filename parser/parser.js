@@ -109,28 +109,31 @@ class Parser {
   }
 
   parseLetStatement() {
-    let letToken = this.currentToken;
+    let statement = new ast.LetStatement(this.currentToken);
 
-    if (!this.expectPeek(tokenType.IDENT))  return null;
-    let name = new ast.Identifier(this.currentToken, this.currentToken.literal);
+    if (!this.expectPeek(tokenType.IDENT))    return null;
+    statement.name = new ast.Identifier(this.currentToken, this.currentToken.literal);
 
-    if (!this.expectPeek(tokenType.ASSIGN)) return null;
+    if (!this.expectPeek(tokenType.ASSIGN))   return null;
+    this.nextToken();
 
-    // TODO: For now we're skipping the expression until we encounter a semicolon
-    while (!this.isCurrentType(tokenType.SEMICOLON)) {  this.nextToken(); }
+    statement.value = this.parseExpression(precedences.LOWEST);
 
-    let statement = new ast.LetStatement(letToken, name, null);
+    if (this.isPeekToken(tokenType.SEMICOLON))
+      this.nextToken();
+
     return statement;
   }
 
   parseReturnStatement() {
-    let returnToken = this.currentToken;
+    let statement = new ast.ReturnStatement(this.currentToken);
     this.nextToken();
 
-    // TODO: For now we're skipping the expression until we encounter a semicolon
-    while (!this.isCurrentType(tokenType.SEMICOLON))  { this.nextToken(); }
+    statement.returnValue = this.parseExpression(precedences.LOWEST);
 
-    let statement = new ast.ReturnStatement(returnToken, null);
+    if (this.isPeekToken(tokenType.SEMICOLON))
+      this.nextToken();
+
     return statement;
   }
 
