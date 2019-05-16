@@ -2,6 +2,8 @@ const readline = require('readline');
 const Lexer = require('../lexer/lexer');
 const Token = require('../token/token');
 const Parser = require('../parser/parser');
+const evaluator = require('../evaluator/evaluator');
+
 const tokenType = Token.tokenTypes;
 
 
@@ -45,7 +47,9 @@ rl.on("line", (line) => {
     printParserErrors(parser.errors);
   }
   else {
-    console.log(program.toString());
+    let evaluated = evaluator.evaluate(program);
+    if (evaluated !== null)
+      console.log(evaluated.inspect());
   }
 
   rl.prompt();
