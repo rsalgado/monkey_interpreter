@@ -1,0 +1,30 @@
+const object = require('../object/object');
+const evaluator = require('./evaluator');
+const Lexer = require('../lexer/lexer');
+const Parser = require('../parser/parser');
+
+
+describe("eval integer expression", () => {
+  let testcases = [
+    {input: "5", expected: 5},
+    {input: "10", expected: 10}
+  ];
+
+  test.each(testcases)("%p", (testcase) => {
+    let evaluated = testEval(testcase.input);
+    testIntegerObject(evaluated, testcase.expected);
+  });
+});
+
+function testEval(input) {
+  let lexer = new Lexer(input);
+  let parser = new Parser(lexer);
+  let program = parser.parseProgram();
+
+  return evaluator.evaluate(program);
+}
+
+function testIntegerObject(intObject, expectedInt) {
+  expect(intObject instanceof object.Integer).toBe(true);
+  expect(intObject.value).toBe(expectedInt);
+}
