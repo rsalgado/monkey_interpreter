@@ -1,7 +1,9 @@
-const object = require('../object/object');
 const evaluator = require('./evaluator');
 const Lexer = require('../lexer/lexer');
 const Parser = require('../parser/parser');
+const object = require('../object/object');
+const objectType = object.objectType;
+
 
 
 describe("eval integer expression", () => {
@@ -77,6 +79,28 @@ describe("bang operator", () => {
   });
 });
 
+describe("if-else expressions", () => {
+  let testcases = [
+    {input: "if (true) { 10 }", expected: 10},
+    {input: "if (false) { 10 }", expected: null},
+    {input: "if (1) { 10 }", expected: 10},
+    {input: "if (1 < 2) { 10 }", expected: 10},
+    {input: "if (1 > 2) { 10 }", expected: null},
+    {input: "if (1 > 2) { 10 } else { 20 }", expected: 20},
+    {input: "if (1 < 2) { 10 } else { 20 }", expected: 10},
+  ];
+
+  test.each(testcases)("%p", (testcase) => {
+    let evaluated = testEval(testcase.input);
+    let integer = testcase.expected;
+
+    if (integer)
+      testIntegerObject(evaluated, integer);
+    else
+      testNullObject(evaluated);
+  });
+});
+
 
 function testEval(input) {
   let lexer = new Lexer(input);
@@ -94,4 +118,8 @@ function testIntegerObject(intObject, expectedInt) {
 function testBooleanObject(boolObject, expectedBool) {
   expect(boolObject instanceof object.Boolean).toBe(true);
   expect(boolObject.value).toBe(expectedBool);
+}
+
+function testNullObject(obj) {
+  expect(obj instanceof object.Null).toBe(true);
 }

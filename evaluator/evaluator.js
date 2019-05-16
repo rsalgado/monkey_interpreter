@@ -32,6 +32,12 @@ function evaluate(astNode) {
     return evaluateInfixExpression(astNode.operator, left, right);
   }
 
+  if (astNode instanceof ast.BlockStatement)
+    return evalStatements(astNode.statements);
+
+  if (astNode instanceof ast.IfExpression)
+    return evalIfExpression(astNode);
+
   return null;
 }
 
@@ -120,6 +126,31 @@ function evaluateIntegerInfixExpression(operator, leftObject, rightObject) {
   }
 }
 
+function evalIfExpression(ifExpression) {
+  let condition = evaluate(ifExpression.condition);
+
+  if (isTruthy(condition))
+    return evaluate(ifExpression.consequence);
+
+  else if (ifExpression.alternative !== null)
+    return evaluate(ifExpression.alternative);
+
+  else
+    return NULL;
+}
+
+function isTruthy(conditionObject) {
+  switch (conditionObject) {
+    case NULL:
+      return false;
+    case TRUE:
+      return true;
+    case FALSE:
+      return false;
+    default:
+      return true;
+  }
+}
 
 module.exports = {
   evaluate,
