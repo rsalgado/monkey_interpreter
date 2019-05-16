@@ -26,6 +26,12 @@ function evaluate(astNode) {
     return evalPrefixExpression(astNode.operator, right);
   }
 
+  if (astNode instanceof ast.InfixExpression) {
+    let left = evaluate(astNode.left);
+    let right = evaluate(astNode.right);
+    return evaluateInfixExpression(astNode.operator, left, right);
+  }
+
   return null;
 }
 
@@ -73,6 +79,45 @@ function evalMinusPrefixOperatorExpression(rightObject) {
 
   let value = rightObject.value;
   return new object.Integer(-value);
+}
+
+function evaluateInfixExpression(operator, leftObject, rightObject) {
+  if (leftObject.type() === objectType.INTEGER_OBJ && rightObject.type() === objectType.INTEGER_OBJ)
+    return evaluateIntegerInfixExpression(operator, leftObject, rightObject);
+
+  // Assuming that the values are booleans, we compare them directly as all point to the same constants
+  if (operator === "==")
+    return nativeBoolToBooleanObject(leftObject === rightObject);
+  if (operator === "!=")
+    return nativeBoolToBooleanObject(leftObject !== rightObject);
+
+  return NULL;
+}
+
+function evaluateIntegerInfixExpression(operator, leftObject, rightObject) {
+  let leftVal = leftObject.value;
+  let rightVal = rightObject.value;
+
+  switch (operator) {
+    case "+":
+      return new object.Integer(leftVal + rightVal);
+    case "-":
+      return new object.Integer(leftVal - rightVal);
+    case "*":
+      return new object.Integer(leftVal * rightVal);
+    case "/":
+      return new object.Integer((leftVal / rightVal)|0);
+    case "<":
+      return new nativeBoolToBooleanObject(leftVal < rightVal);
+    case ">":
+      return new nativeBoolToBooleanObject(leftVal > rightVal);
+    case "==":
+      return new nativeBoolToBooleanObject(leftVal === rightVal);
+    case "!=":
+      return new nativeBoolToBooleanObject(leftVal !== rightVal);
+    default:
+      return NULL;
+  }
 }
 
 
