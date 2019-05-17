@@ -3,6 +3,7 @@ const objectType = {
   INTEGER_OBJ: "INTEGER",
   BOOLEAN_OBJ: "BOOLEAN",
   NULL_OBJ: "NULL",
+  RETURN_VALUE_OBJ: "RETURN_VALUE"
 };
 
 
@@ -29,9 +30,19 @@ class Null {
   inspect() { return "null"; }
 }
 
+class ReturnValue {
+  constructor(value) {
+    this.value = value;
+  }
+
+  type() { return objectType.RETURN_VALUE_OBJ; }
+  inspect() { return this.value.inspect(); }
+}
+
 module.exports = {
   objectType,
   Integer,
   Boolean,
   Null,
+  ReturnValue,
 };

@@ -10,7 +10,10 @@ const NULL = new object.Null();
 
 function evaluate(astNode) {
   if (astNode instanceof ast.Program)
-    return evalStatements(astNode.statements);
+    return evalProgram(astNode.statements);
+
+  if (astNode instanceof ast.BlockStatement)
+    return evalBlockStatement(astNode);
 
   if (astNode instanceof ast.ExpressionStatement)
     return evaluate(astNode.expression);
@@ -38,15 +41,37 @@ function evaluate(astNode) {
   if (astNode instanceof ast.IfExpression)
     return evalIfExpression(astNode);
 
+  if (astNode instanceof ast.ReturnStatement) {
+    let value = evaluate(astNode.returnValue);
+    return new object.ReturnValue(value);
+  }
+
+
   return null;
 }
 
-function evalStatements(statements) {
+function evalProgram(statements) {
   let result;
   
-  statements.forEach(statement => {
+  for (let statement of statements) {
     result = evaluate(statement);
-  });
+
+    if (result instanceof object.ReturnValue)
+      return result.value;
+  }
+
+  return result;
+}
+
+function evalBlockStatement(block) {
+  let result = null;
+
+  for (let statement of block.statements) {
+    result = evaluate(statement);
+
+    if (result !== null && result.type() === objectType.RETURN_VALUE_OBJ)
+      return result;
+  }
 
   return result;
 }
