@@ -26,12 +26,20 @@ function evaluate(astNode) {
 
   if (astNode instanceof ast.PrefixExpression) {
     let right = evaluate(astNode.right);
+    if (isError(right))
+      return right;
     return evalPrefixExpression(astNode.operator, right);
   }
 
   if (astNode instanceof ast.InfixExpression) {
     let left = evaluate(astNode.left);
+    if (isError(left))
+      return left;
+
     let right = evaluate(astNode.right);
+    if (isError(right))
+      return right;
+
     return evalInfixExpression(astNode.operator, left, right);
   }
 
@@ -43,6 +51,8 @@ function evaluate(astNode) {
 
   if (astNode instanceof ast.ReturnStatement) {
     let value = evaluate(astNode.returnValue);
+    if (isError(value))
+      return value;
     return new object.ReturnValue(value);
   }
 
@@ -162,6 +172,8 @@ function evalIntegerInfixExpression(operator, leftObject, rightObject) {
 
 function evalIfExpression(ifExpression) {
   let condition = evaluate(ifExpression.condition);
+  if (isError(condition))
+    return condition;
 
   if (isTruthy(condition))
     return evaluate(ifExpression.consequence);
@@ -188,6 +200,13 @@ function isTruthy(conditionObject) {
 
 function newError(message) {
   return new object.Error(message);
+}
+
+function isError(obj) {
+  if (obj) {
+    return obj.type() === object.ERROR_OBJ;
+  }
+  return false;
 }
 
 module.exports = {
