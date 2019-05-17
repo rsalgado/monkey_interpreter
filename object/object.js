@@ -3,7 +3,8 @@ const objectType = {
   INTEGER_OBJ: "INTEGER",
   BOOLEAN_OBJ: "BOOLEAN",
   NULL_OBJ: "NULL",
-  RETURN_VALUE_OBJ: "RETURN_VALUE"
+  RETURN_VALUE_OBJ: "RETURN_VALUE",
+  ERROR_OBJ: "ERROR",
 };
 
 
@@ -39,10 +40,20 @@ class ReturnValue {
   inspect() { return this.value.inspect(); }
 }
 
+class Error {
+  constructor(message) {
+    this.message = message;
+  }
+
+  type() { return objectType.ERROR_OBJ; }
+  inspect() { return `ERROR: ${this.message}`; }
+}
+
 module.exports = {
   objectType,
   Integer,
   Boolean,
   Null,
   ReturnValue,
+  Error,
 };

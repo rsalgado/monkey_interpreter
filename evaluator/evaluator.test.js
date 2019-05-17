@@ -123,6 +123,31 @@ describe("return statements", () => {
   });
 });
 
+describe("error handling", () => {
+  let testcases = [
+    {input: "5 + true;", expectedMessage: "type mismatch: INTEGER + BOOLEAN"},
+    {input: "5 + true; 5", expectedMessage: "type mismatch: INTEGER + BOOLEAN"},
+    {input: "-true", expectedMessage: "unknown operator: -BOOLEAN"},
+    {input: "true + false;", expectedMessage: "unknown operator: BOOLEAN + BOOLEAN"},
+    {input: "5; true + false; 5", expectedMessage: "unknown operator: BOOLEAN + BOOLEAN"},
+    {input: "if (10 > 1) { true + false; }", expectedMessage: "unknown operator: BOOLEAN + BOOLEAN"},
+    {input: `
+      if (10 > 1) {
+        if (10 > 1) {
+          return true + false;
+        }
+        return 1;
+      }
+    `, expectedMessage: "unknown operator: BOOLEAN + BOOLEAN"},
+  ];
+
+  test.each(testcases)("%p", testcase => {
+    let evaluated = testEval(testcase.input);
+    expect(evaluated instanceof object.Error).toBe(true);
+    expect(evaluated.message).toBe(testcase.expectedMessage);
+  });
+});
+
 function testEval(input) {
   let lexer = new Lexer(input);
   let parser = new Parser(lexer);

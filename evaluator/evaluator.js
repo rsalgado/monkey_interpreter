@@ -32,7 +32,7 @@ function evaluate(astNode) {
   if (astNode instanceof ast.InfixExpression) {
     let left = evaluate(astNode.left);
     let right = evaluate(astNode.right);
-    return evaluateInfixExpression(astNode.operator, left, right);
+    return evalInfixExpression(astNode.operator, left, right);
   }
 
   if (astNode instanceof ast.BlockStatement)
@@ -58,6 +58,8 @@ function evalProgram(statements) {
 
     if (result instanceof object.ReturnValue)
       return result.value;
+    if (result instanceof object.Error)
+      return result;
   }
 
   return result;
@@ -69,8 +71,11 @@ function evalBlockStatement(block) {
   for (let statement of block.statements) {
     result = evaluate(statement);
 
-    if (result !== null && result.type() === objectType.RETURN_VALUE_OBJ)
-      return result;
+    if (result !== null) {
+      let resultType = result.type();
+      if (resultType === objectType.RETURN_VALUE_OBJ || resultType === objectType.ERROR_OBJ)
+        return result;
+    }
   }
 
   return result;
@@ -88,7 +93,7 @@ function evalPrefixExpression(operator, rightObject) {
     case "-":
       return evalMinusPrefixOperatorExpression(rightObject);
     default:
-      return NULL;
+      return newError(`unknown operator: ${operator}${rightObject.type()}`);
   }
 }
 
@@ -106,15 +111,19 @@ function evalBangOperatorExpression(rightObject) {
 }
 
 function evalMinusPrefixOperatorExpression(rightObject) {
-  if (rightObject.type() !== objectType.INTEGER_OBJ)   return NULL;
+  if (rightObject.type() !== objectType.INTEGER_OBJ)
+    return newError(`unknown operator: -${rightObject.type()}`);
 
   let value = rightObject.value;
   return new object.Integer(-value);
 }
 
-function evaluateInfixExpression(operator, leftObject, rightObject) {
+function evalInfixExpression(operator, leftObject, rightObject) {
   if (leftObject.type() === objectType.INTEGER_OBJ && rightObject.type() === objectType.INTEGER_OBJ)
-    return evaluateIntegerInfixExpression(operator, leftObject, rightObject);
+    return evalIntegerInfixExpression(operator, leftObject, rightObject);
+
+  if (leftObject.type() !== rightObject.type())
+    return newError(`type mismatch: ${leftObject.type()} ${operator} ${rightObject.type()}`);
 
   // Assuming that the values are booleans, we compare them directly as all point to the same constants
   if (operator === "==")
@@ -122,10 +131,10 @@ function evaluateInfixExpression(operator, leftObject, rightObject) {
   if (operator === "!=")
     return nativeBoolToBooleanObject(leftObject !== rightObject);
 
-  return NULL;
+  return newError(`unknown operator: ${leftObject.type()} ${operator} ${rightObject.type()}`);
 }
 
-function evaluateIntegerInfixExpression(operator, leftObject, rightObject) {
+function evalIntegerInfixExpression(operator, leftObject, rightObject) {
   let leftVal = leftObject.value;
   let rightVal = rightObject.value;
 
@@ -147,7 +156,7 @@ function evaluateIntegerInfixExpression(operator, leftObject, rightObject) {
     case "!=":
       return new nativeBoolToBooleanObject(leftVal !== rightVal);
     default:
-      return NULL;
+      return newError(`unknown operator: ${leftObject.type()} ${operator} ${rightObject.type()}`);
   }
 }
 
@@ -175,6 +184,10 @@ function isTruthy(conditionObject) {
     default:
       return true;
   }
+}
+
+function newError(message) {
+  return new object.Error(message);
 }
 
 module.exports = {
