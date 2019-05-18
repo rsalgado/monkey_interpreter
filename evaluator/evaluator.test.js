@@ -1,6 +1,7 @@
 const evaluator = require('./evaluator');
 const Lexer = require('../lexer/lexer');
 const Parser = require('../parser/parser');
+const Environment = require('../object/environment');
 const object = require('../object/object');
 const objectType = object.objectType;
 
@@ -139,6 +140,7 @@ describe("error handling", () => {
         return 1;
       }
     `, expectedMessage: "unknown operator: BOOLEAN + BOOLEAN"},
+    {input: "foobar", expectedMessage: "identifier not found: foobar"},
   ];
 
   test.each(testcases)("%p", testcase => {
@@ -148,12 +150,27 @@ describe("error handling", () => {
   });
 });
 
+describe("let statements", () => {
+  let testcases = [
+    {input: "let a = 5; a;", expected: 5},
+    {input: "let a = 5 * 5; a;", expected: 25},
+    {input: "let a = 5; let b = a; b;", expected: 5},
+    {input: "let a = 5; let b = a; let c = a + b + 5; c;", expected: 15},
+  ];
+
+  test.each(testcases)("%p", (testcase) => {
+    let evaluated = testEval(testcase.input);
+    testIntegerObject(evaluated, testcase.expected);
+  });
+});
+
 function testEval(input) {
   let lexer = new Lexer(input);
   let parser = new Parser(lexer);
   let program = parser.parseProgram();
+  let env = new Environment();
 
-  return evaluator.evaluate(program);
+  return evaluator.evaluate(program, env);
 }
 
 function testIntegerObject(intObject, expectedInt) {

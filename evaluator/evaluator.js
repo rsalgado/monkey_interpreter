@@ -8,15 +8,15 @@ const FALSE = new object.Boolean(false);
 const NULL = new object.Null();
 
 
-function evaluate(astNode) {
+function evaluate(astNode, environment) {
   if (astNode instanceof ast.Program)
-    return evalProgram(astNode.statements);
+    return evalProgram(astNode.statements, environment);
 
   if (astNode instanceof ast.BlockStatement)
-    return evalBlockStatement(astNode);
+    return evalBlockStatement(astNode, environment);
 
   if (astNode instanceof ast.ExpressionStatement)
-    return evaluate(astNode.expression);
+    return evaluate(astNode.expression, environment);
 
   if (astNode instanceof ast.IntegerLiteral)
     return new object.Integer(astNode.value);
@@ -25,46 +25,54 @@ function evaluate(astNode) {
     return nativeBoolToBooleanObject(astNode.value);
 
   if (astNode instanceof ast.PrefixExpression) {
-    let right = evaluate(astNode.right);
+    let right = evaluate(astNode.right, environment);
     if (isError(right))
       return right;
     return evalPrefixExpression(astNode.operator, right);
   }
 
   if (astNode instanceof ast.InfixExpression) {
-    let left = evaluate(astNode.left);
+    let left = evaluate(astNode.left, environment);
     if (isError(left))
       return left;
 
-    let right = evaluate(astNode.right);
+    let right = evaluate(astNode.right, environment);
     if (isError(right))
       return right;
 
     return evalInfixExpression(astNode.operator, left, right);
   }
 
-  if (astNode instanceof ast.BlockStatement)
-    return evalStatements(astNode.statements);
-
   if (astNode instanceof ast.IfExpression)
-    return evalIfExpression(astNode);
+    return evalIfExpression(astNode, environment);
 
   if (astNode instanceof ast.ReturnStatement) {
-    let value = evaluate(astNode.returnValue);
+    let value = evaluate(astNode.returnValue, environment);
     if (isError(value))
       return value;
     return new object.ReturnValue(value);
   }
 
+  if (astNode instanceof ast.LetStatement) {
+    let value = evaluate(astNode.value, environment);
+    if (isError(value))
+      return value;
+
+    environment.set(astNode.name.value, value);
+  }
+
+  if (astNode instanceof ast.Identifier)
+    return evalIdentifier(astNode, environment);
+
 
   return null;
 }
 
-function evalProgram(statements) {
+function evalProgram(statements, environment) {
   let result;
   
   for (let statement of statements) {
-    result = evaluate(statement);
+    result = evaluate(statement, environment);
 
     if (result instanceof object.ReturnValue)
       return result.value;
@@ -75,11 +83,11 @@ function evalProgram(statements) {
   return result;
 }
 
-function evalBlockStatement(block) {
+function evalBlockStatement(block, environment) {
   let result = null;
 
   for (let statement of block.statements) {
-    result = evaluate(statement);
+    result = evaluate(statement, environment);
 
     if (result !== null) {
       let resultType = result.type();
@@ -170,19 +178,27 @@ function evalIntegerInfixExpression(operator, leftObject, rightObject) {
   }
 }
 
-function evalIfExpression(ifExpression) {
-  let condition = evaluate(ifExpression.condition);
+function evalIfExpression(ifExpression, environment) {
+  let condition = evaluate(ifExpression.condition, environment);
   if (isError(condition))
     return condition;
 
   if (isTruthy(condition))
-    return evaluate(ifExpression.consequence);
+    return evaluate(ifExpression.consequence, environment);
 
   else if (ifExpression.alternative !== null)
-    return evaluate(ifExpression.alternative);
+    return evaluate(ifExpression.alternative, environment);
 
   else
     return NULL;
+}
+
+function evalIdentifier(identifierNode, environment) {
+  let value = environment.get(identifierNode.value);
+  if (value)
+    return value;
+  else
+    return newError(`identifier not found: ${identifierNode.value}`);
 }
 
 function isTruthy(conditionObject) {

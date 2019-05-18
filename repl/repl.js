@@ -2,6 +2,7 @@ const readline = require('readline');
 const Lexer = require('../lexer/lexer');
 const Token = require('../token/token');
 const Parser = require('../parser/parser');
+const Environment = require('../object/environment');
 const evaluator = require('../evaluator/evaluator');
 
 const tokenType = Token.tokenTypes;
@@ -34,6 +35,8 @@ let rl = readline.createInterface({
   prompt: PROMPT
 });
 
+let environment = new Environment();
+
 console.log(GREETING);
 rl.prompt();
 
@@ -47,7 +50,7 @@ rl.on("line", (line) => {
     printParserErrors(parser.errors);
   }
   else {
-    let evaluated = evaluator.evaluate(program);
+    let evaluated = evaluator.evaluate(program, environment);
     if (evaluated !== null)
       console.log(evaluated.inspect());
   }
