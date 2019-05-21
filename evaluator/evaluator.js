@@ -1,7 +1,7 @@
 const ast  = require('../ast/ast');
 const object = require('../object/object');
 const objectType = object.objectType;
-
+const newEnclosedEnvironment = require('../object/environment').newEnclosedEnvironment;
 
 const TRUE = new object.Boolean(true);
 const FALSE = new object.Boolean(false);
@@ -64,12 +64,31 @@ function evaluate(astNode, environment) {
   if (astNode instanceof ast.Identifier)
     return evalIdentifier(astNode, environment);
 
+  if (astNode instanceof ast.FunctionLiteral) {
+    let params = astNode.parameters;
+    let body = astNode.body;
+
+    return new object.Function(params, body, environment);
+  }
+
+  if (astNode instanceof ast.CallExpression) {
+    let funcObj = evaluate(astNode.func, environment);
+    if (isError(funcObj))
+      return funcObj;
+
+    let args = evalExpressions(astNode.args, environment);
+    if (args.length === 1 && isError(args[0]))
+      return args[0];
+
+    return applyFunction(funcObj, args);
+  }
+
 
   return null;
 }
 
 function evalProgram(statements, environment) {
-  let result;
+  let result = null;
   
   for (let statement of statements) {
     result = evaluate(statement, environment);
@@ -223,6 +242,47 @@ function isError(obj) {
     return obj.type() === object.ERROR_OBJ;
   }
   return false;
+}
+
+function evalExpressions(expressions, environment) {
+  let result = [];
+
+  for (let expression of expressions) {
+    let evaluated = evaluate(expression, environment);
+    if (isError(evaluated))
+      return [new Object(evaluated)];
+
+    result.push(evaluated);
+  }
+
+  return result;
+}
+
+function applyFunction(fn, args) {
+  if (!(fn instanceof object.Function))
+    return newError(`not a function: ${fn.type()}`);
+
+  let extendedEnv = extendFunctionEnv(fn, args);
+  let evaluated = evaluate(fn.body, extendedEnv);
+  return unwrapReturnValue(evaluated);
+}
+
+function extendFunctionEnv(fn, args) {
+  let env = newEnclosedEnvironment(fn.env);
+
+  for (let i = 0; i < fn.parameters.length; i++) {
+    let param = fn.parameters[i];
+    env.set(param.value, args[i]);
+  }
+
+  return env;
+}
+
+function unwrapReturnValue(obj) {
+  if (obj instanceof object.ReturnValue)
+    return obj.value;
+
+  return obj;
 }
 
 module.exports = {

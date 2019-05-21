@@ -5,6 +5,7 @@ const objectType = {
   NULL_OBJ: "NULL",
   RETURN_VALUE_OBJ: "RETURN_VALUE",
   ERROR_OBJ: "ERROR",
+  FUNCTION_OBJ: "FUNCTION",
 };
 
 
@@ -49,6 +50,21 @@ class Error {
   inspect() { return `ERROR: ${this.message}`; }
 }
 
+class Function {
+  constructor(parameters = [], body = null, env = null) {
+    this.parameters = parameters;
+    this.body = body;
+    this.env = env;
+  }
+
+  type() { return objectType.FUNCTION_OBJ; }
+  inspect() {
+    return `fn(${this.parameters.join(",")}) { 
+  ${this.body}
+}`;
+  }
+}
+
 module.exports = {
   objectType,
   Integer,
@@ -56,4 +72,5 @@ module.exports = {
   Null,
   ReturnValue,
   Error,
+  Function,
 };

@@ -1,7 +1,7 @@
 const evaluator = require('./evaluator');
 const Lexer = require('../lexer/lexer');
 const Parser = require('../parser/parser');
-const Environment = require('../object/environment');
+const Environment = require('../object/environment').Environment;
 const object = require('../object/object');
 const objectType = object.objectType;
 
@@ -159,6 +159,36 @@ describe("let statements", () => {
   ];
 
   test.each(testcases)("%p", (testcase) => {
+    let evaluated = testEval(testcase.input);
+    testIntegerObject(evaluated, testcase.expected);
+  });
+});
+
+test("function object", () => {
+  let input = "fn(x) { x + 2; };";
+  let evaluated = testEval(input);
+  expect(evaluated instanceof object.Function).toBe(true);
+  expect(evaluated.parameters.length).toBe(1);
+  expect(evaluated.parameters[0].toString()).toBe("x");
+
+  expect(evaluated.body.statements.length).toBe(1);
+
+  let firstStatement = evaluated.body.statements[0];
+  let expectedBody = "(x + 2);";
+  expect(firstStatement.toString()).toBe(expectedBody);
+});
+
+describe("function application", () => {
+  let testcases = [
+    {input: "let identity = fn(x) { x; }; identity(5);", expected: 5},
+    {input: "let identity = fn(x) { return x; }; identity(5);", expected: 5},
+    {input: "let double = fn(x) { x * 2; }; double(5);", expected: 10},
+    {input: "let add = fn(x, y) { x + y; }; add(5, 5);", expected: 10},
+    {input: "let add = fn(x, y) { x + y; }; add(5 + 5, add(5, 5));", expected: 20},
+    {input: "fn(x) { x; }(5);", expected: 5},
+  ];
+
+  test.each(testcases)("%p", testcase => {
     let evaluated = testEval(testcase.input);
     testIntegerObject(evaluated, testcase.expected);
   });

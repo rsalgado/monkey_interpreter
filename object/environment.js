@@ -2,10 +2,16 @@
 class Environment {
   constructor(store = {}) {
     this.store = store;
+    this.outer = null;
   }
 
   get(name) {
-    return this.store[name];
+    let result = this.store[name];
+
+    if (result)
+      return result;
+    if (this.outer)
+      return this.outer.get(name);
   }
 
   set(name, value) {
@@ -14,4 +20,13 @@ class Environment {
   }
 }
 
-module.exports = Environment;
+function newEnclosedEnvironment(outer) {
+  let env = new Environment();
+  env.outer = outer;
+  return env;
+}
+
+module.exports = {
+  Environment,
+  newEnclosedEnvironment,
+};
