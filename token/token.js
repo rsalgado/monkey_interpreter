@@ -4,6 +4,7 @@ const tokenTypes = {
 
   IDENT: "IDENT",
   INT: "INT",
+  STRING: "STRING",
 
   ASSIGN: "=",
   PLUS: "+",

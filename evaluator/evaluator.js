@@ -24,6 +24,10 @@ function evaluate(astNode, environment) {
   if (astNode instanceof ast.Boolean)
     return nativeBoolToBooleanObject(astNode.value);
 
+  if (astNode instanceof ast.StringLiteral) {
+    return new object.String(astNode.value);
+  }
+
   if (astNode instanceof ast.PrefixExpression) {
     let right = evaluate(astNode.right, environment);
     if (isError(right))

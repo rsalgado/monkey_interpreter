@@ -96,6 +96,21 @@ class IntegerLiteral {
   }
 }
 
+class StringLiteral {
+  constructor(token, value = null) {
+    this.token = token;
+    this.value = value;
+  }
+
+  tokenLiteral() {
+    return this.token.literal;
+  }
+
+  toString() {
+    return this.token.literal;
+  }
+}
+
 class PrefixExpression {
   constructor(token, operator = null) {
     this.token = token;
@@ -224,6 +239,7 @@ module.exports = {
   ExpressionStatement,
   Identifier,
   IntegerLiteral,
+  StringLiteral,
   PrefixExpression,
   InfixExpression,
   Boolean,

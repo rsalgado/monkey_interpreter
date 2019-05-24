@@ -36,6 +36,7 @@ class Parser {
 
     this.registerPrefix(tokenType.IDENT, this.parseIdentifier);
     this.registerPrefix(tokenType.INT, this.parseIntegerLiteral);
+    this.registerPrefix(tokenType.STRING, this.parseStringLiteral);
     this.registerPrefix(tokenType.TRUE, this.parseBoolean);
     this.registerPrefix(tokenType.FALSE, this.parseBoolean);
     this.registerPrefix(tokenType.BANG, this.parsePrefixExpression);
@@ -183,6 +184,10 @@ class Parser {
     }
 
     return new ast.IntegerLiteral(this.currentToken, value);
+  }
+
+  parseStringLiteral() {
+    return new ast.StringLiteral(this.currentToken, this.currentToken.literal);
   }
 
   parseBoolean() {

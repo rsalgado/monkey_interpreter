@@ -104,6 +104,10 @@ class Lexer {
         token = newToken(tokenType.RBRACE, this.ch);
         break;
 
+      case '"':
+        token = newToken(tokenType.STRING, this.readString());
+        break;
+
       case null:
         token = newToken(tokenType.EOF, "");
         break;
@@ -153,6 +157,15 @@ class Lexer {
   readNumber() {
     let position = this.position;
     while (isDigit(this.ch))  this.readChar();
+
+    return this.input.slice(position, this.position);
+  }
+
+  readString() {
+    let position = this.position + 1;
+    do {
+      this.readChar();
+    } while (this.ch !== '"' && this.ch !== null);
 
     return this.input.slice(position, this.position);
   }

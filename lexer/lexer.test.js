@@ -80,6 +80,8 @@ test("nextToken function - Additional tokens", () => {
 
   10 == 10;
   10 != 9;
+  "foobar"
+  "foo bar"
   `;
 
   let tests = [
@@ -127,6 +129,10 @@ test("nextToken function - Additional tokens", () => {
     {type: tokenType.NOT_EQ, literal: "!="},
     {type: tokenType.INT, literal: "9"},
     {type: tokenType.SEMICOLON, literal: ";"},
+
+    {type: tokenType.STRING, literal: "foobar"},
+    {type: tokenType.STRING, literal: "foo bar"},
+
     {type: tokenType.EOF, literal: ""},
   ];
 

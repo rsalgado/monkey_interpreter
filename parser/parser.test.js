@@ -126,6 +126,23 @@ test("boolean literal expression", () => {
   testBoolean(expression, true);
 });
 
+test("string literal expression", () => {
+  let input = `"hello world";`;
+  let lexer = new Lexer(input);
+  let parser = new Parser(lexer);
+  let program = parser.parseProgram();
+
+  expect(parser.errors).toEqual([]);
+  expect(program.statements.length).toBe(1);
+
+  let statement = program.statements[0];
+  expect(statement instanceof ast.ExpressionStatement).toBe(true);
+  expect(statement.expression instanceof ast.StringLiteral).toBe(true);
+  
+  let literal = statement.expression;
+  expect(literal.value).toBe("hello world");
+});
+
 
 describe("if expressions", () => {
   test("if expression", () => {

@@ -2,6 +2,7 @@
 const objectType = {
   INTEGER_OBJ: "INTEGER",
   BOOLEAN_OBJ: "BOOLEAN",
+  STRING_OBJ: "STRING",
   NULL_OBJ: "NULL",
   RETURN_VALUE_OBJ: "RETURN_VALUE",
   ERROR_OBJ: "ERROR",
@@ -24,6 +25,15 @@ class Boolean {
   }
 
   type() { return objectType.BOOLEAN_OBJ; }
+  inspect() { return `${this.value}`; }
+}
+
+class String {
+  constructor(value) {
+    this.value = value;
+  }
+
+  type() { return objectType.STRING_OBJ; }
   inspect() { return `${this.value}`; }
 }
 
@@ -69,6 +79,7 @@ module.exports = {
   objectType,
   Integer,
   Boolean,
+  String,
   Null,
   ReturnValue,
   Error,

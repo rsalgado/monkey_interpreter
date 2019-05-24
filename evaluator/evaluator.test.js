@@ -64,6 +64,14 @@ describe("eval boolean expression", () => {
   });
 });
 
+test("eval string literal", () => {
+  let input = `"Hello World!"`;
+  let evaluated = testEval(input);
+  
+  expect(evaluated instanceof object.String).toBe(true);
+  expect(evaluated.value).toBe("Hello World!");
+});
+
 describe("bang operator", () => {
   let testcases = [
     {input: "!true", expected: false},
