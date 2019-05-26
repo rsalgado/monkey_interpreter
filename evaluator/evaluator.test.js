@@ -3,7 +3,6 @@ const Lexer = require('../lexer/lexer');
 const Parser = require('../parser/parser');
 const Environment = require('../object/environment').Environment;
 const object = require('../object/object');
-const objectType = object.objectType;
 
 
 
@@ -68,6 +67,14 @@ test("eval string literal", () => {
   let input = `"Hello World!"`;
   let evaluated = testEval(input);
   
+  expect(evaluated instanceof object.String).toBe(true);
+  expect(evaluated.value).toBe("Hello World!");
+});
+
+test("string concatenation", () => {
+  let input = `"Hello" + " " + "World!"`;
+  let evaluated = testEval(input);
+
   expect(evaluated instanceof object.String).toBe(true);
   expect(evaluated.value).toBe("Hello World!");
 });
@@ -149,6 +156,7 @@ describe("error handling", () => {
       }
     `, expectedMessage: "unknown operator: BOOLEAN + BOOLEAN"},
     {input: "foobar", expectedMessage: "identifier not found: foobar"},
+    {input: `"Hello" - "World"`, expectedMessage: "unknown operator: STRING - STRING"},
   ];
 
   test.each(testcases)("%p", testcase => {

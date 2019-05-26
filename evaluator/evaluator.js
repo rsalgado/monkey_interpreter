@@ -163,6 +163,9 @@ function evalInfixExpression(operator, leftObject, rightObject) {
   if (leftObject.type() === objectType.INTEGER_OBJ && rightObject.type() === objectType.INTEGER_OBJ)
     return evalIntegerInfixExpression(operator, leftObject, rightObject);
 
+  if (leftObject.type() === objectType.STRING_OBJ && rightObject.type() === objectType.STRING_OBJ)
+    return evalStringInfixExpression(operator, leftObject, rightObject);
+
   if (leftObject.type() !== rightObject.type())
     return newError(`type mismatch: ${leftObject.type()} ${operator} ${rightObject.type()}`);
 
@@ -199,6 +202,14 @@ function evalIntegerInfixExpression(operator, leftObject, rightObject) {
     default:
       return newError(`unknown operator: ${leftObject.type()} ${operator} ${rightObject.type()}`);
   }
+}
+
+function evalStringInfixExpression(operator, leftObject, rightObject) {
+  if (operator !== "+")   return newError(`unknown operator: ${leftObject.type()} ${operator} ${rightObject.type()}`);
+
+  let leftVal = leftObject.value;
+  let rightVal = rightObject.value;
+  return new object.String(leftVal + rightVal);
 }
 
 function evalIfExpression(ifExpression, environment) {
