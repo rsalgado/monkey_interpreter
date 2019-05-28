@@ -210,6 +210,32 @@ describe("function application", () => {
   });
 });
 
+describe("built-in functions", () => {
+  let testcases = [
+    {input: `len("")`, expected: 0},
+    {input: `len("four")`, expected: 4},
+    {input: `len("hello world")`, expected: 11},
+    {input: `len(1)`, expected: "argument to `len` not supported, got INTEGER"},
+    {input: `len("one", "two")`, expected: "wrong number of arguments. got=2, want=1"},
+  ];
+
+  test.each(testcases)("%p", testcase => {
+    let evaluated = testEval(testcase.input);
+
+    switch (typeof testcase.expected) {
+      case "number":
+        testIntegerObject(evaluated, testcase.expected);
+        break;
+      case "string":
+        let errorObj = evaluated;
+        expect(errorObj instanceof object.Error).toBe(true);
+        expect(errorObj.message).toBe(testcase.expected);
+        break;
+    }
+  });
+});
+
+
 function testEval(input) {
   let lexer = new Lexer(input);
   let parser = new Parser(lexer);

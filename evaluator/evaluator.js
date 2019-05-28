@@ -1,7 +1,8 @@
-const ast  = require('../ast/ast');
+const ast = require('../ast/ast');
 const object = require('../object/object');
 const objectType = object.objectType;
 const newEnclosedEnvironment = require('../object/environment').newEnclosedEnvironment;
+const builtins = require("./builtins");
 
 const TRUE = new object.Boolean(true);
 const FALSE = new object.Boolean(false);
@@ -231,6 +232,8 @@ function evalIdentifier(identifierNode, environment) {
   let value = environment.get(identifierNode.value);
   if (value)
     return value;
+  else if (builtins[identifierNode.value])
+    return builtins[identifierNode.value];
   else
     return newError(`identifier not found: ${identifierNode.value}`);
 }
@@ -274,12 +277,17 @@ function evalExpressions(expressions, environment) {
 }
 
 function applyFunction(fn, args) {
-  if (!(fn instanceof object.Function))
-    return newError(`not a function: ${fn.type()}`);
+  if (fn instanceof object.Function) {
+    let extendedEnv = extendFunctionEnv(fn, args);
+    let evaluated = evaluate(fn.body, extendedEnv);
+    return unwrapReturnValue(evaluated);    
+  }
 
-  let extendedEnv = extendFunctionEnv(fn, args);
-  let evaluated = evaluate(fn.body, extendedEnv);
-  return unwrapReturnValue(evaluated);
+  if (fn instanceof object.Builtin) {
+    return fn.fn(args);
+  }
+
+  return newError(`not a function: ${fn.type()}`);
 }
 
 function extendFunctionEnv(fn, args) {
@@ -302,4 +310,5 @@ function unwrapReturnValue(obj) {
 
 module.exports = {
   evaluate,
+  newError,
 }

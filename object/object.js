@@ -7,6 +7,7 @@ const objectType = {
   RETURN_VALUE_OBJ: "RETURN_VALUE",
   ERROR_OBJ: "ERROR",
   FUNCTION_OBJ: "FUNCTION",
+  BUILTIN_OBJ: "BUILTIN",
 };
 
 
@@ -75,6 +76,16 @@ class Function {
   }
 }
 
+class Builtin {
+  constructor(fn) {
+    this.fn = fn;
+  }
+
+  type() { return objectType.BUILTIN_OBJ; }
+  inspect() { return "builtin function"; }
+}
+
+
 module.exports = {
   objectType,
   Integer,
@@ -84,4 +95,5 @@ module.exports = {
   ReturnValue,
   Error,
   Function,
+  Builtin,
 };
