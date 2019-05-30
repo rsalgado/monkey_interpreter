@@ -194,6 +194,19 @@ test("function object", () => {
   expect(firstStatement.toString()).toBe(expectedBody);
 });
 
+test("function closures", () => {
+  let input = `
+let newAdder = fn(x) {
+  fn(y) { x + y };
+};
+
+let addTwo = newAdder(2);
+addTwo(2);`;
+
+  let evaluated = testEval(input);
+  testIntegerObject(evaluated, 4);
+});
+
 describe("function application", () => {
   let testcases = [
     {input: "let identity = fn(x) { x; }; identity(5);", expected: 5},
@@ -217,24 +230,45 @@ describe("built-in functions", () => {
     {input: `len("hello world")`, expected: 11},
     {input: `len([])`, expected: 0},
     {input: `len(["single"])`, expected: 1},
-    {input: `len([2, 3, 5, 7])`, expeceted: 4},
+    {input: `len([2, 3, 5, 7])`, expected: 4},
     {input: `len(1)`, expected: "argument to `len` not supported, got INTEGER"},
     {input: `len("one", "two")`, expected: "wrong number of arguments. got=2, want=1"},
-    // TODO: Add testcases for `first`, `last`, `rest` and `push`
+
+    {input: `first([1, 2, 3])`, expected: 1},
+    {input: `first([])`, expected: null},
+    {input: `first(1)`, expected: "argument to `first` must be ARRAY, got INTEGER"},
+    {input: `last([1, 2, 3])`, expected: 3},
+    {input: `last([])`, expected: null},
+    {input: `last(1)`, expected: "argument to `last` must be ARRAY, got INTEGER"},
+    {input: `rest([1, 2, 3])`, expected: [2, 3]},
+    {input: `rest([])`, expected: null},
+    {input: `push([], 1)`, expected: [1]},
+    {input: `push(1, 1)`, expected: "argument to `push` must be ARRAY, got INTEGER"},
   ];
 
   test.each(testcases)("%p", testcase => {
     let evaluated = testEval(testcase.input);
 
-    switch (typeof testcase.expected) {
-      case "number":
+    if (typeof testcase.expected === "number")
         testIntegerObject(evaluated, testcase.expected);
-        break;
-      case "string":
+
+    else if (typeof testcase.expected === "string") {
         let errorObj = evaluated;
         expect(errorObj instanceof object.Error).toBe(true);
         expect(errorObj.message).toBe(testcase.expected);
-        break;
+    }
+
+    else if (testcase.expected === null)
+      testNullObject(evaluated);
+  
+    else if (testcase.expected instanceof Array) {
+      expect(evaluated instanceof object.Array).toBe(true);
+      expect(evaluated.elements.length).toBe(testcase.expected.length);
+
+      testcase.expected.forEach((el, i) => {
+        let intObject = evaluated.elements[i];
+        testIntegerObject(intObject, el);
+      });
     }
   });
 });

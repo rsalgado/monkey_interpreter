@@ -46,7 +46,7 @@ let builtins = {
     let arg = args[0];
 
     if (arg.type() !== objectType.ARRAY_OBJ)
-      return new object.Error(`argument to \`last\` must be ARRAY, got ${arg.type()} `);
+      return new object.Error(`argument to \`last\` must be ARRAY, got ${arg.type()}`);
 
     let length = arg.elements.length;
     if (length > 0)
@@ -59,7 +59,7 @@ let builtins = {
     if (args.length !== 1)
       return new object.Error(`wrong number of arguments. got=${args.length}, want=1`);
 
-    arg = args[0];
+    let arg = args[0];
 
     if (arg.type() !== objectType.ARRAY_OBJ)
       return new object.Error(`argument to \`rest\` must be ARRAY, got ${arg.type()}`);
