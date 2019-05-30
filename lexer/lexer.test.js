@@ -82,6 +82,7 @@ test("nextToken function - Additional tokens", () => {
   10 != 9;
   "foobar"
   "foo bar"
+  [1, 2];
   `;
 
   let tests = [
@@ -132,6 +133,13 @@ test("nextToken function - Additional tokens", () => {
 
     {type: tokenType.STRING, literal: "foobar"},
     {type: tokenType.STRING, literal: "foo bar"},
+
+    {type: tokenType.LBRACKET, literal: "["},
+    {type: tokenType.INT, literal: "1"},
+    {type: tokenType.COMMA, literal: ","},
+    {type: tokenType.INT, literal: "2"},
+    {type: tokenType.RBRACKET, literal: "]"},
+    {type: tokenType.SEMICOLON, literal: ";"},
 
     {type: tokenType.EOF, literal: ""},
   ];

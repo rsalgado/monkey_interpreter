@@ -88,6 +88,24 @@ function evaluate(astNode, environment) {
     return applyFunction(funcObj, args);
   }
 
+  if (astNode instanceof ast.ArrayLiteral) {
+    let elements = evalExpressions(astNode.elements, environment);
+    if (elements.length === 1 && isError(elements[0]))
+      return elements[0];
+
+    return new object.Array(elements);
+  }
+
+  if (astNode instanceof ast.IndexExpression) {
+    let left = evaluate(astNode.left, environment);
+    if (isError(left))  return left;
+
+    let index = evaluate(astNode.index, environment);
+    if (isError(index)) return index;
+
+    return evalIndexExpression(left, index);
+  }
+
 
   return null;
 }
@@ -238,6 +256,24 @@ function evalIdentifier(identifierNode, environment) {
     return newError(`identifier not found: ${identifierNode.value}`);
 }
 
+function evalIndexExpression(leftObject, indexObject) {
+  if (leftObject.type() === objectType.ARRAY_OBJ && indexObject.type() === objectType.INTEGER_OBJ) {
+    return evalArrayIndexExpresion(leftObject, indexObject);
+  }
+
+  return newError(`index operator not supported: ${leftObject.type()}`);
+}
+
+function evalArrayIndexExpresion(arrayObject, indexObject) {
+  let index = indexObject.value;
+  let max = arrayObject.elements.length - 1;
+
+  if (index < 0 || index > max)   return NULL;
+
+  return arrayObject.elements[index];
+}
+
+
 function isTruthy(conditionObject) {
   switch (conditionObject) {
     case NULL:
@@ -268,7 +304,7 @@ function evalExpressions(expressions, environment) {
   for (let expression of expressions) {
     let evaluated = evaluate(expression, environment);
     if (isError(evaluated))
-      return [new Object(evaluated)];
+      return [evaluated];
 
     result.push(evaluated);
   }

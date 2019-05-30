@@ -8,6 +8,7 @@ const objectType = {
   ERROR_OBJ: "ERROR",
   FUNCTION_OBJ: "FUNCTION",
   BUILTIN_OBJ: "BUILTIN",
+  ARRAY_OBJ: "ARRAY",
 };
 
 
@@ -76,6 +77,18 @@ class Function {
   }
 }
 
+class Array {
+  constructor(elements = []) {
+    this.elements = elements;
+  }
+
+  type() { return objectType.ARRAY_OBJ; }
+  inspect() {
+    let elements = this.elements.map(el => el.inspect()); 
+    return `[${elements.join(", ")}]`; 
+  }
+}
+
 class Builtin {
   constructor(fn) {
     this.fn = fn;
@@ -96,4 +109,5 @@ module.exports = {
   Error,
   Function,
   Builtin,
+  Array,
 };

@@ -231,6 +231,38 @@ class CallExpression {
   }
 }
 
+class ArrayLiteral {
+  constructor(token) {
+    this.token = token;
+    this.elements = [];
+  }
+
+  tokenLiteral() {
+    return this.token.literal;
+  }
+
+  toString() {
+    let elements = this.elements.map(el => el.toString()).join(", ");
+    return `[${elements}]`;
+  }
+}
+
+class IndexExpression {
+  constructor(token, left = null, index = null) {
+    this.token = token;
+    this.left = left;
+    this.index = index;
+  }
+
+  tokenLiteral() {
+    return this.token.literal;
+  }
+
+  toString() {
+    return `${this.left}[${this.index}]`;
+  }
+}
+
 
 module.exports = {
   Program,
@@ -246,5 +278,7 @@ module.exports = {
   IfExpression,
   BlockStatement,
   FunctionLiteral,
-  CallExpression
+  CallExpression,
+  ArrayLiteral,
+  IndexExpression,
 };

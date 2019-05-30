@@ -104,6 +104,14 @@ class Lexer {
         token = newToken(tokenType.RBRACE, this.ch);
         break;
 
+      case '[':
+        token = newToken(tokenType.LBRACKET, this.ch);
+        break;
+
+      case ']':
+        token = newToken(tokenType.RBRACKET, this.ch);
+        break;
+
       case '"':
         token = newToken(tokenType.STRING, this.readString());
         break;

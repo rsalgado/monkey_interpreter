@@ -9,7 +9,8 @@ const precedences = {
   SUM: 3,         // +
   PRODUCT: 4,     // *
   PREFIX: 5,      // -X or !X
-  CALL: 6         // myFunction(X)
+  CALL: 6,        // myFunction(X)
+  INDEX: 7,       // array[X]
 };
 
 const tokenPrecedence = {
@@ -21,7 +22,8 @@ const tokenPrecedence = {
   [tokenType.MINUS]: precedences.SUM,
   [tokenType.SLASH]: precedences.PRODUCT,
   [tokenType.ASTERISK]: precedences.PRODUCT,
-  [tokenType.LPAREN]: precedences.CALL
+  [tokenType.LPAREN]: precedences.CALL,
+  [tokenType.LBRACKET]: precedences.INDEX,
 };
 
 
@@ -44,6 +46,7 @@ class Parser {
     this.registerPrefix(tokenType.LPAREN, this.parseGroupedExpression);
     this.registerPrefix(tokenType.IF, this.parseIfExpression);
     this.registerPrefix(tokenType.FUNCTION, this.parseFunctionLiteral);
+    this.registerPrefix(tokenType.LBRACKET, this.parseArrayLiteral);
 
     this.registerInfix(tokenType.PLUS, this.parseInfixExpression);
     this.registerInfix(tokenType.MINUS, this.parseInfixExpression);
@@ -54,6 +57,7 @@ class Parser {
     this.registerInfix(tokenType.LT, this.parseInfixExpression);
     this.registerInfix(tokenType.GT, this.parseInfixExpression);
     this.registerInfix(tokenType.LPAREN, this.parseCallExpression);
+    this.registerInfix(tokenType.LBRACKET, this.parseIndexExpression);
 
     this.nextToken();
     this.nextToken();
@@ -298,33 +302,51 @@ class Parser {
     return identifiers;
   }
 
-  parseCallExpression(funcExpression) {
-    let expression = new ast.CallExpression(this.currentToken, funcExpression);
-    expression.args = this.parseCallArguments();
+  parseIndexExpression(leftExpression) {
+    let expression = new ast.IndexExpression(this.currentToken, leftExpression);
+
+    this.nextToken();
+    expression.index = this.parseExpression(precedences.LOWEST);
+
+    if (!this.expectPeek(tokenType.RBRACKET))   return null;
 
     return expression;
   }
 
-  parseCallArguments() {
-    let args = [];
+  parseCallExpression(funcExpression) {
+    let expression = new ast.CallExpression(this.currentToken, funcExpression);
+    expression.args = this.parseExpressionList(tokenType.RPAREN);
 
-    if (this.isPeekToken(tokenType.RPAREN)) {
+    return expression;
+  }
+
+  parseArrayLiteral() {
+    let array = new ast.ArrayLiteral(this.currentToken);
+    array.elements = this.parseExpressionList(tokenType.RBRACKET);
+
+    return array;
+  }
+
+  parseExpressionList(endTokenType) {
+    let list = [];
+
+    if (this.isPeekToken(endTokenType)) {
       this.nextToken();
-      return args;
+      return list;
     }
 
     this.nextToken();
-    args.push(this.parseExpression(precedences.LOWEST));
+    list.push(this.parseExpression(precedences.LOWEST));
 
     while (this.isPeekToken(tokenType.COMMA)) {
       this.nextToken();
       this.nextToken();
-      args.push(this.parseExpression(precedences.LOWEST));
+      list.push(this.parseExpression(precedences.LOWEST));
     }
 
-    if (!this.expectPeek(tokenType.RPAREN))   return null;
+    if (!this.expectPeek(endTokenType))   return null;
 
-    return args;
+    return list;
   }
 
 

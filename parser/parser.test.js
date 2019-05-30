@@ -256,6 +256,44 @@ test("call expression parsing", () => {
   testInfixExpression(expression.args[2], 4, "+", 5);
 });
 
+test("parsing array literals", () => {
+  let input = `[1, 2 * 2, 3 + 3];`;
+  let lexer = new Lexer(input);
+  let parser = new Parser(lexer);
+  let program = parser.parseProgram();
+
+  expect(parser.errors).toEqual([]);
+  
+  let statement = program.statements[0];
+  expect(statement instanceof ast.ExpressionStatement).toBe(true);
+  
+  let array = statement.expression;
+  expect(array instanceof ast.ArrayLiteral).toBe(true);
+  expect(array.elements.length).toBe(3);
+  
+  testIntegerLiteral(array.elements[0], 1);
+  testInfixExpression(array.elements[1], 2, "*", 2);
+  testInfixExpression(array.elements[2], 3, "+", 3);
+});
+
+test("parsing index expressions", () => {
+  let input = `myArray[1 + 1];`;
+  let lexer = new Lexer(input);
+  let parser = new Parser(lexer);
+  let program = parser.parseProgram();
+
+  expect(parser.errors).toEqual([]);
+
+  let statement = program.statements[0];
+  expect(statement instanceof ast.ExpressionStatement).toBe(true);
+
+  let indexExpression = statement.expression;
+  expect(indexExpression instanceof ast.IndexExpression).toBe(true);
+
+  testIdentifier(indexExpression.left, "myArray");
+  testInfixExpression(indexExpression.index, 1, "+", 1);
+});
+
 describe("function parameter parsing", () => {
   let testcases = [
     {input: "fn() {};", expectedParams: []},
@@ -371,6 +409,9 @@ describe("operator precedence parsing", () => {
     {input: "a + add(b * c) + d;", expected: "((a + add((b * c))) + d);"},
     {input: "add(a, b, 1, 2 * 3, 4 + 5, add(6, 7 * 8));", expected: "add(a, b, 1, (2 * 3), (4 + 5), add(6, (7 * 8)));"},
     {input: "add(a + b + c * d / f + g);", expected: "add((((a + b) + ((c * d) / f)) + g));"},
+    
+    {input: "a * [1, 2, 3, 4][b * c] * d;", expected: "((a * [1, 2, 3, 4][(b * c)]) * d);"},
+    {input: "add(a * b[2], b[1], 2 * [1, 2][1]);", expected: "add((a * b[2]), b[1], (2 * [1, 2][1]));"},
   ];
 
   test.each(testcases)("%p", (testcase) => {
