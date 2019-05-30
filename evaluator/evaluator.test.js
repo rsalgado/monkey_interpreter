@@ -215,8 +215,12 @@ describe("built-in functions", () => {
     {input: `len("")`, expected: 0},
     {input: `len("four")`, expected: 4},
     {input: `len("hello world")`, expected: 11},
+    {input: `len([])`, expected: 0},
+    {input: `len(["single"])`, expected: 1},
+    {input: `len([2, 3, 5, 7])`, expeceted: 4},
     {input: `len(1)`, expected: "argument to `len` not supported, got INTEGER"},
     {input: `len("one", "two")`, expected: "wrong number of arguments. got=2, want=1"},
+    // TODO: Add testcases for `first`, `last`, `rest` and `push`
   ];
 
   test.each(testcases)("%p", testcase => {
