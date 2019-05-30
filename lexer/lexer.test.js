@@ -79,11 +79,7 @@ test("nextToken function - Additional tokens", () => {
   }
 
   10 == 10;
-  10 != 9;
-  "foobar"
-  "foo bar"
-  [1, 2];
-  `;
+  10 != 9;`;
 
   let tests = [
     {type: tokenType.BANG, literal: "!"},
@@ -131,6 +127,29 @@ test("nextToken function - Additional tokens", () => {
     {type: tokenType.INT, literal: "9"},
     {type: tokenType.SEMICOLON, literal: ";"},
 
+
+
+    {type: tokenType.EOF, literal: ""},
+  ];
+
+  let lexer = new Lexer(input);
+
+  tests.forEach(expectedToken => {
+    let token = lexer.nextToken();
+
+    expect(token.type).toBe(expectedToken.type);
+    expect(token.literal).toBe(expectedToken.literal);
+  });
+});
+
+test("nextToken function - Additional tokens for advanced literals", () => {
+  let input = `
+  "foobar"
+  "foo bar"
+  [1, 2];
+  {"foo": "bar"};`;
+
+  let tests = [
     {type: tokenType.STRING, literal: "foobar"},
     {type: tokenType.STRING, literal: "foo bar"},
 
@@ -139,6 +158,13 @@ test("nextToken function - Additional tokens", () => {
     {type: tokenType.COMMA, literal: ","},
     {type: tokenType.INT, literal: "2"},
     {type: tokenType.RBRACKET, literal: "]"},
+    {type: tokenType.SEMICOLON, literal: ";"},
+
+    {type: tokenType.LBRACE, literal: "{"},
+    {type: tokenType.STRING, literal: "foo"},
+    {type: tokenType.COLON, literal: ":"},
+    {type: tokenType.STRING, literal: "bar"},
+    {type: tokenType.RBRACE, literal: "}"},
     {type: tokenType.SEMICOLON, literal: ";"},
 
     {type: tokenType.EOF, literal: ""},

@@ -88,6 +88,10 @@ class Lexer {
         token = newToken(tokenType.SEMICOLON, this.ch);
         break;
 
+      case ':':
+        token = newToken(tokenType.COLON, this.ch);
+        break;
+
       case '(':
         token = newToken(tokenType.LPAREN, this.ch);
         break;

@@ -424,6 +424,82 @@ describe("operator precedence parsing", () => {
   });
 });
 
+test("parsing hash literals with string keys", () => {
+  let input = `{"one": 1, "two": 2, "three": 3};`;
+
+  let lexer = new Lexer(input);
+  let parser = new Parser(lexer);
+  let program = parser.parseProgram();
+
+  expect(parser.errors).toEqual([]);
+
+  let statement = program.statements[0];
+  expect(statement instanceof ast.ExpressionStatement).toBe(true);
+
+  let hash = statement.expression;
+  expect(hash instanceof ast.HashLiteral).toBe(true);
+  expect(hash.pairs.length).toBe(3);
+
+  let expected = {
+    "one": 1,
+    "two": 2,
+    "three": 3
+  };
+
+  for (let pair of hash.pairs) {
+    expect(pair.key instanceof ast.StringLiteral).toBe(true);
+
+    let expectedValue = expected[pair.key.toString()];
+    testIntegerLiteral(pair.value, expectedValue);
+  }  
+});
+
+test("parsing empty hash literal", () => {
+  let input = "{}";
+  let lexer = new Lexer(input);
+  let parser = new Parser(lexer);
+  let program = parser.parseProgram();
+
+  expect(parser.errors).toEqual([]);
+
+  let statement = program.statements[0];
+  expect(statement instanceof ast.ExpressionStatement).toBe(true);
+
+  let hash = statement.expression;
+  expect(hash instanceof ast.HashLiteral).toBe(true);
+  expect(hash.pairs.length).toBe(0);
+});
+
+test("parsing hash literals with expressions", () => {
+  let input = `{"one": 0 + 1, "two": 10 - 8, "three": 15 / 5}`;
+
+  let lexer = new Lexer(input);
+  let parser = new Parser(lexer);
+  let program = parser.parseProgram();
+
+  expect(parser.errors).toEqual([]);
+
+  let statement = program.statements[0];
+  expect(statement instanceof ast.ExpressionStatement).toBe(true);
+
+  let hash = statement.expression;
+  expect(hash instanceof ast.HashLiteral).toBe(true);
+  expect(hash.pairs.length).toBe(3);
+
+  let expected = {
+    "one": (expression) => testInfixExpression(expression, 0, "+", 1),
+    "two": (expression) => testInfixExpression(expression, 10, "-", 8),
+    "three": (expression) => testInfixExpression(expression, 15, "/", 5),
+  };
+
+  for (let pair of hash.pairs) {
+    expect(pair.key instanceof ast.StringLiteral).toBe(true);
+
+    let testFunc = expected[pair.key.toString()];
+    testFunc(pair.value);
+  }
+});
+
 
 function testInfixExpression(expression, left, operator, right) {
   expect(expression instanceof ast.InfixExpression).toBe(true);

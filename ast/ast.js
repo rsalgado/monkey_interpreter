@@ -263,6 +263,25 @@ class IndexExpression {
   }
 }
 
+class HashLiteral {
+  constructor(token) {
+    this.token = token;
+    // Each pair is an object with properties `key` and `value`. e.g. {key: <expression>, value: <expression>}.
+    this.pairs = [];
+  }
+
+  tokenLiteral() {
+    return this.token.literal;
+  }
+
+  toString() {
+    let pairs = this.pairs
+                    .map(p => `${p.key}:${p.value}`)
+                    .join(", ");
+    return `{${pairs}}`;
+  }
+}
+
 
 module.exports = {
   Program,
@@ -281,4 +300,5 @@ module.exports = {
   CallExpression,
   ArrayLiteral,
   IndexExpression,
+  HashLiteral,
 };

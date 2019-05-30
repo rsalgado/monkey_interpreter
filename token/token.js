@@ -17,6 +17,7 @@ const tokenTypes = {
 
   COMMA: ",",
   SEMICOLON: ";",
+  COLON: ":",
 
   LPAREN: "(",
   RPAREN: ")",
