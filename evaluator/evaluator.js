@@ -260,9 +260,11 @@ function evalIdentifier(identifierNode, environment) {
 }
 
 function evalIndexExpression(leftObject, indexObject) {
-  if (leftObject.type() === objectType.ARRAY_OBJ && indexObject.type() === objectType.INTEGER_OBJ) {
+  if (leftObject.type() === objectType.ARRAY_OBJ && indexObject.type() === objectType.INTEGER_OBJ)
     return evalArrayIndexExpresion(leftObject, indexObject);
-  }
+
+  if (leftObject.type() === objectType.HASH_OBJ)
+    return evalHashIndexExpression(leftObject, indexObject);
 
   return newError(`index operator not supported: ${leftObject.type()}`);
 }
@@ -274,6 +276,16 @@ function evalArrayIndexExpresion(arrayObject, indexObject) {
   if (index < 0 || index > max)   return NULL;
 
   return arrayObject.elements[index];
+}
+
+function evalHashIndexExpression(hashObject, indexObject) {
+  if (!indexObject.hashKey)
+    return newError(`unusable as hash key: ${indexObject.type()}`);
+
+  let pair = hashObject.pairs[indexObject.hashKey().value];
+  if (!pair)  return NULL;
+
+  return pair.value;
 }
 
 function evalHashLiteral(astNode, environment) {

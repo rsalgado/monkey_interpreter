@@ -157,6 +157,7 @@ describe("error handling", () => {
     `, expectedMessage: "unknown operator: BOOLEAN + BOOLEAN"},
     {input: "foobar", expectedMessage: "identifier not found: foobar"},
     {input: `"Hello" - "World"`, expectedMessage: "unknown operator: STRING - STRING"},
+    {input: `{"name": "Monkey"}[fn(x) {x}];`, expectedMessage: "unusable as hash key: FUNCTION"},
   ];
 
   test.each(testcases)("%p", testcase => {
@@ -285,6 +286,31 @@ test("array literals", () => {
   testIntegerObject(evaluated.elements[2], 6);
 });
 
+describe("array index expressions", () => {
+  let testcases = [
+    {input: "[1, 2, 3][0]", expected: 1},
+    {input: "[1, 2, 3][1]", expected: 2},
+    {input: "[1, 2, 3][2]", expected: 3},
+    {input: "let i = 0; [1][i];", expected: 1},
+    {input: "[1, 2, 3][1 + 1];", expected: 3},
+    {input: "let myArray = [1, 2, 3]; myArray[2];", expected: 3},
+    {input: "let myArray = [1, 2, 3]; myArray[0] + myArray[1] + myArray[2];", expected: 6},
+    {input: "let myArray = [1, 2, 3]; let i = myArray[0]; myArray[i];", expected: 2},
+    {input: "[1, 2, 3][3]", expected: null},
+    {input: "[1, 2, 3][-1]", expected: null},
+  ];
+
+  test.each(testcases)("%p", testcase => {
+    let evaluated = testEval(testcase.input);
+    let integer = testcase.expected;
+
+    if (integer !== null)
+      testIntegerObject(evaluated, integer);
+    else
+      testNullObject(evaluated);
+  });
+});
+
 test("hash literal", () => {
   let input = `let two = "two";
   {
@@ -321,28 +347,26 @@ test("hash literal", () => {
   }
 });
 
-describe("array index expressions", () => {
+describe("hash index expressions", () => {
   let testcases = [
-    {input: "[1, 2, 3][0]", expected: 1},
-    {input: "[1, 2, 3][1]", expected: 2},
-    {input: "[1, 2, 3][2]", expected: 3},
-    {input: "let i = 0; [1][i];", expected: 1},
-    {input: "[1, 2, 3][1 + 1];", expected: 3},
-    {input: "let myArray = [1, 2, 3]; myArray[2];", expected: 3},
-    {input: "let myArray = [1, 2, 3]; myArray[0] + myArray[1] + myArray[2];", expected: 6},
-    {input: "let myArray = [1, 2, 3]; let i = myArray[0]; myArray[i];", expected: 2},
-    {input: "[1, 2, 3][3]", expected: null},
-    {input: "[1, 2, 3][-1]", expected: null},
+    {input: `{"foo": 5}["foo"]`, expected: 5},
+    {input: `{"foo": 5}["bar"]`, expected: null},
+    {input: `let key = "foo"; {"foo": 5}[key]`, expected: 5},
+    {input: `{}["foo"]`, expected: null},
+    {input: `{5: 5}[5]`, expected: 5},
+    {input: `{true: 5}[true]`, expected: 5},
+    {input: `{false: 5}[false]`, expected: 5},
   ];
 
   test.each(testcases)("%p", testcase => {
     let evaluated = testEval(testcase.input);
     let integer = testcase.expected;
 
-    if (integer !== null)
+    if (integer)
       testIntegerObject(evaluated, integer);
     else
       testNullObject(evaluated);
+
   });
 });
 
