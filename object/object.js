@@ -9,6 +9,7 @@ const objectType = {
   FUNCTION_OBJ: "FUNCTION",
   BUILTIN_OBJ: "BUILTIN",
   ARRAY_OBJ: "ARRAY",
+  HASH_OBJ: "HASH",
 };
 
 
@@ -19,6 +20,10 @@ class Integer {
 
   type() { return objectType.INTEGER_OBJ; }
   inspect() { return `${this.value}`; }
+
+  hashKey() {
+    return new HashKey(this.type(), this.value);
+  }
 }
 
 class Boolean {
@@ -28,6 +33,17 @@ class Boolean {
 
   type() { return objectType.BOOLEAN_OBJ; }
   inspect() { return `${this.value}`; }
+
+  hashKey() {
+    let value = null;
+
+    if (this.value)
+      value = 1;
+    else
+      value = 0;
+
+    return new HashKey(this.type(), value);
+  }
 }
 
 class String {
@@ -37,6 +53,21 @@ class String {
 
   type() { return objectType.STRING_OBJ; }
   inspect() { return `${this.value}`; }
+
+  hashKey() {
+    // This implementation of a hash was taken from: 
+    // https://stackoverflow.com/a/7616484
+
+    let hashVal = 0;
+
+    for (let i = 0; i < this.value.length; i++) {
+      let chr = this.value.charCodeAt(i);
+      hashVal = ((hashVal << 5) - hashVal) + chr;
+      hashVal |= 0;
+    }
+
+    return new HashKey(this.type(), hashVal);
+  }
 }
 
 class Null {
@@ -98,6 +129,34 @@ class Builtin {
   inspect() { return "builtin function"; }
 }
 
+class HashKey {
+  constructor(type = null, value = null) {
+    this.type = type;
+    this.value = value;
+  }
+}
+
+class HashPair {
+  constructor(key = null, value = null) {
+    this.key = key;
+    this.value = value;
+  }
+}
+
+class Hash {
+  constructor(pairs) {
+    this.pairs = pairs;
+  }
+
+  type() { return objectType.HASH_OBJ; }
+  inspect() {
+    let pairs = Object.values(this.pairs)
+                      .map(p => `${p.key.inspect()}: ${p.value.inspect()}`);
+
+    return `{${pairs.join(", ")}}`;
+  }
+}
+
 
 module.exports = {
   objectType,
@@ -110,4 +169,6 @@ module.exports = {
   Function,
   Builtin,
   Array,
+  HashPair,
+  Hash,
 };

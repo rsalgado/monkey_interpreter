@@ -106,6 +106,9 @@ function evaluate(astNode, environment) {
     return evalIndexExpression(left, index);
   }
 
+  if (astNode instanceof ast.HashLiteral)
+    return evalHashLiteral(astNode, environment);
+
 
   return null;
 }
@@ -271,6 +274,31 @@ function evalArrayIndexExpresion(arrayObject, indexObject) {
   if (index < 0 || index > max)   return NULL;
 
   return arrayObject.elements[index];
+}
+
+function evalHashLiteral(astNode, environment) {
+  let pairsMap = {};
+
+  for (let pair of astNode.pairs) {
+    let keyNode = pair.key;
+    let valueNode = pair.value;
+
+    let key = evaluate(keyNode, environment);
+    if (isError(key))
+      return key;
+
+    if (!key.hashKey)
+      return newError(`unusable as hash key: ${key.type()}`);
+
+    let value = evaluate(valueNode, environment);
+    if (isError(value))
+      return value;
+
+    let hashed = key.hashKey().value;
+    pairsMap[hashed] = new object.HashPair(key, value);
+  }
+
+  return new object.Hash(pairsMap);
 }
 
 

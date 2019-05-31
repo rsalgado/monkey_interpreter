@@ -285,6 +285,42 @@ test("array literals", () => {
   testIntegerObject(evaluated.elements[2], 6);
 });
 
+test("hash literal", () => {
+  let input = `let two = "two";
+  {
+    "one": 10 - 9,
+    "two": 1 + 1,
+    "thr" + "ee": 6 / 2,
+    4: 4,
+    true: 5,
+    false: 6
+  }`;
+
+  let evaluated = testEval(input);
+  expect(evaluated instanceof object.Hash);
+
+  let expected = [
+    {key: new object.String("one").hashKey().value, value: 1},
+    {key: new object.String("two").hashKey().value, value: 2},
+    {key: new object.String("three").hashKey().value, value: 3},
+    {key: new object.Integer(4).hashKey().value, value: 4},
+    {key: new object.Boolean(true).hashKey().value, value: 5},
+    {key: new object.Boolean(false).hashKey().value, value: 6},
+  ];
+
+  expect(Object.keys(evaluated.pairs).length).toBe(expected.length);
+
+  for (let expectedEntry of expected) {
+    let expectedKey = expectedEntry.key;
+    let expectedValue = expectedEntry.value;
+
+    let pair = evaluated.pairs[expectedKey];
+    expect(pair instanceof object.HashPair).toBe(true);
+    
+    testIntegerObject(pair.value, expectedValue);
+  }
+});
+
 describe("array index expressions", () => {
   let testcases = [
     {input: "[1, 2, 3][0]", expected: 1},
