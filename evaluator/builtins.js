@@ -88,6 +88,13 @@ let builtins = {
     return new object.Array(newElements);
   }),
 
+  "puts": new object.Builtin(args => {
+    args.forEach(arg => 
+      console.log(arg.inspect())
+    );
+    return new object.Null();
+  }),
+
 };
 
 module.exports = builtins;
